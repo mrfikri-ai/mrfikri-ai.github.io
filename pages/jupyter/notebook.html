@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jupyter-like HTML Page</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+
+        .notebook {
+            background-color: #f7f7f7;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .code-cell {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        pre {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="notebook">
+        <h1>My Jupyter-like HTML Page</h1>
+
+        <div class="code-cell">
+            <pre><code>print("Hello, World!")</code></pre>
+        </div>
+
+        <div class="code-cell">
+            <pre><code># Another code cell
+for i in range(5):
+    print(f"Value: {i}")</code></pre>
+        </div>
+
+        <p>This is a text cell in the notebook.</p>
+    </div>
+</body>
+</html>
