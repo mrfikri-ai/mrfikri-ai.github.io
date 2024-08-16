@@ -1,22 +1,33 @@
-.social-links {
-            margin-top: 20px;
-            font-size: 1.2rem;
-}
-.social-links a {
-            margin-right: 15px;
-            text-decoration: none;
-            color: inherit;
-}
-.social-links img {
-            width: 20px;
-            height: 20px;
-            vertical-align: middle;
-            margin-right: 15px;
+/* Styling for the circular image */
+.img-custom {
+    width: 150px; /* Set the width of the circular image */
+    height: 150px; /* Set the height of the circular image */
+    border-radius: 50%; /* Make the image circular */
+    object-fit: cover; /* Ensure the image covers the circle */
+    display: block; /* Ensure image behaves like a block element */
+    margin: 0 auto; /* Center the image horizontally if needed */
 }
 
-.img-custom {
-            width: 150px;  /* Set the width of the circular image */
-            height: 150px; /* Set the height of the circular image */
-            border-radius: 50%; /* Make the image circular */
-            object-fit: cover; /* Ensure the image covers the circle */
+/* Container for social links */
+.social-links {
+    margin-top: 20px; /* Space above the section */
+    font-size: 1.2rem; /* Font size for social links */
+    margin-left: 20px; /* Optional: shift section to the right */
+}
+
+/* Individual social link styling */
+.social-links a {
+    display: inline-flex;
+    align-items: center; /* Vertically center-align the icon and text */
+    margin-right: 15px; /* Space between each social link */
+    text-decoration: none; /* Remove underline from links */
+    color: inherit; /* Inherit text color from parent */
+}
+
+/* Icon styling within social links */
+.social-links img {
+    width: 20px; /* Width of the icon */
+    height: 20px; /* Height of the icon */
+    vertical-align: middle; /* Align the icon with the text */
+    margin-right: 5px; /* Space between icon and text */
 }
