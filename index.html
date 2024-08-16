@@ -23,6 +23,26 @@
             vertical-align: middle;
             margin-right: 5px;
         }
+
+        .section-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .section-content img {
+            width: 100px;  /* Set width of the circular image */
+            height: 100px; /* Set height of the circular image */
+            border-radius: 50%; /* Make the image circular */
+            object-fit: cover; /* Ensure the image covers the circle */
+        }
+        .text-content {
+            text-align: center;
+        }
+        @media (min-width: 768px) {
+            .text-content {
+                text-align: start;
+            }
+        }
     </style>
     
 <body>
