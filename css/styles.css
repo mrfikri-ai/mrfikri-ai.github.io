@@ -1,16 +1,22 @@
 .social-links {
-    margin-left: 20px; /* Adjust the value to shift right */
-    padding: 10px 0; /* Optional: add some padding for better spacing */
+            margin-top: 20px;
+            font-size: 1.2rem;
 }
-
 .social-links a {
-    display: inline-flex;
-    align-items: center;
-    margin-right: 15px; /* Space between icons */
+            margin-right: 15px;
+            text-decoration: none;
+            color: inherit;
+}
+.social-links img {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+            margin-right: 5px;
 }
 
-.social-links img {
-    width: 24px; /* Adjust size as needed */
-    height: 24px;
-    margin-right: 8px; /* Space between icon and text */
+.img-custom {
+            width: 150px;  /* Set the width of the circular image */
+            height: 150px; /* Set the height of the circular image */
+            border-radius: 50%; /* Make the image circular */
+            object-fit: cover; /* Ensure the image covers the circle */
 }
