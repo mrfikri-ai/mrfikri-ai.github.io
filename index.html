@@ -1,19 +1,97 @@
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">Muhamad Rausyan Fikri</a>
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav me-auto">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Muhamad Rausyan Fikri's Personal Page">
+  <title>Muhamad Rausyan Fikri</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+    }
+    #sidebar {
+      background-color: #f8f9fa;
+      padding: 20px;
+      height: 100vh;
+      position: fixed;
+      width: 250px;
+    }
+    #content {
+      margin-left: 270px;
+      padding: 20px;
+    }
+    h1, h2, h3 {
+      color: #343a40;
+    }
+  </style>
+</head>
+<body>
+  <nav id="sidebar">
+    <center>
+        <h1><a href="#"><img src="https://mrfikri-ai.github.io/img/moth.jpg" alt="Profile Image" class="img-fluid rounded-circle" height="150" width="150"></a></h1>
+    </center> 
+    <ul class="nav flex-column">
         <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
-        <li class="nav-item"><a class="nav-link" href="#projects">Projects</a></li>
-      </ul>
-    </div>
-  </div>
-</nav>
+        <li class="nav-item"><h2>Contents</h2>
+          <ul class="nav flex-column">
+              <li class="nav-item"><a class="nav-link" href="#linear-algebra">Linear Algebra</a></li>
+              <li class="nav-item"><a class="nav-link" href="#game-theory">Game Theory</a></li>
+              <li class="nav-item"><a class="nav-link" href="#optimization">Optimization</a></li>
+          </ul>
+        </li>
+    </ul>
+  </nav>
 
-<section id="home" class="p-5 bg-light text-center">
-  <h1>Welcome to My Page</h1>
-  <p>Ph.D. student exploring AI and Mathematics.</p>
-</section>
+  <section id="content">
+    <article id="home">
+      <h2>Introduction</h2>
+      <section>
+        <h4>Welcome to My Page</h4>
+        <p>Hi, my name is Muhamad Rausyan Fikri, a Ph.D. student in Finland. This page provides coding and mathematical details that I couldn't fit on other platforms. Enjoy!</p>
+        <p>
+          <a href="https://github.com/mrfikri-ai" target="_blank">Github</a> |
+          <a href="https://scholar.google.com/citations?hl=en&user=JXZU3RAAAAAJ" target="_blank">Google Scholar</a> |
+          <a href="https://sites.google.com/view/mrfikri/home" target="_blank">Sites Google</a>
+        </p>
+      </section>
+    </article>
+
+    <article id="linear-algebra">
+      <h2>Linear Algebra</h2>
+      <section>
+        <h3>List of Contents</h3>
+        <p>Introduction to Sets</p>
+        <p>Matrix</p>
+      </section>
+    </article>  
+
+    <article id="optimization">
+      <h2>Optimization</h2>
+      <section>
+        <h3>List of Contents</h3>
+        <p>Introduction to Optimization</p>
+        <p>Convex Sets and Function</p>
+        <p>Unconstrained Optimization</p>
+        <p>Constrained Optimization</p>
+      </section>
+    </article>
+
+    <article id="game-theory">
+      <h2>Game Theory</h2>
+      <section>
+        <h3>List of Contents</h3>
+        <p>Introduction to Game Theory</p>
+        <p>Zero-sum Game</p>
+        <p>Nash Equilibrium</p>
+      </section>
+    </article>
+  </section>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
