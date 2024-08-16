@@ -3,19 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog - Muhamad Rausyan Fikri</title>
+    <title>Object-Oriented Programming in Python</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .blog-post {
-            margin-bottom: 2rem;
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
         }
-        .blog-post-title {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
+        .code-highlight {
+            background-color: #f0f0f0;
+            border-left: 4px solid #007bff;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
         }
-        .blog-post-meta {
-            color: #6c757d;
-            font-size: 0.875rem;
+        .container {
+            max-width: 900px;
         }
     </style>
 </head>
@@ -25,38 +30,85 @@
   <div class="container-fluid">
     <a class="navbar-brand" href="#">Muhamad Rausyan Fikri</a>
     <div class="collapse navbar-collapse">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item"><a class="nav-link" href="https://mrfikri-ai.github.io/">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="pages/research.html">Research</a></li>
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="research.html">Research</a></li>
         <li class="nav-item"><a class="nav-link" href="pages/blog.html">Blog</a></li>
       </ul>
     </div>
   </div>
 </nav>
 
-<section class="container mt-5">
-  <h1 class="text-center mb-4">Blog</h1>
+<section id="blog" class="p-5 bg-light">
+  <div class="container">
+    <h1 class="text-center mb-4">Understanding Object-Oriented Programming in Python</h1>
+    <p class="lead">In this blog post, we'll explore the principles of Object-Oriented Programming (OOP) in Python. We'll cover the basics of classes, objects, inheritance, and encapsulation through examples.</p>
+    
+    <h2>1. Introduction to Classes and Objects</h2>
+    <p>In Python, a class is a blueprint for creating objects. Objects represent instances of classes. Here's a basic example:</p>
+    
+    <div class="code-highlight">
+      <pre><code class="language-python">class Person:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
 
-  <article class="blog-post">
-    <h2 class="blog-post-title">Blog Post Title 1</h2>
-    <p class="blog-post-meta">August 16, 2024 by <a href="#">Author Name</a></p>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum. Integer vehicula est a metus facilisis, in varius libero tincidunt.</p>
-    <a class="btn btn-primary" href="#">Read More</a>
-  </article>
+    def greet(self):
+        return f"Hello, my name is {self.name} and I am {self.age} years old."
 
-  <article class="blog-post">
-    <h2 class="blog-post-title">Blog Post Title 2</h2>
-    <p class="blog-post-meta">August 10, 2024 by <a href="#">Author Name</a></p>
-    <p>Nulla facilisi. Mauris sollicitudin eros vel nisl egestas, at volutpat turpis fermentum. Fusce ac ligula nec lacus efficitur tincidunt non et lectus.</p>
-    <a class="btn btn-primary" href="#">Read More</a>
-  </article>
+# Creating an object of the Person class
+person1 = Person("Alice", 30)
+print(person1.greet())  # Output: Hello, my name is Alice and I am 30 years old.</code></pre>
+    </div>
+    
+    <p>In this example, we define a `Person` class with an `__init__` method that initializes the attributes `name` and `age`, and a `greet` method that returns a greeting message.</p>
+    
+    <h2>2. Inheritance</h2>
+    <p>Inheritance allows a class to inherit attributes and methods from another class. Here's an example of inheritance:</p>
+    
+    <div class="code-highlight">
+      <pre><code class="language-python">class Student(Person):
+    def __init__(self, name, age, student_id):
+        super().__init__(name, age)
+        self.student_id = student_id
 
-  <article class="blog-post">
-    <h2 class="blog-post-title">Blog Post Title 3</h2>
-    <p class="blog-post-meta">August 1, 2024 by <a href="#">Author Name</a></p>
-    <p>Phasellus bibendum, felis non ultrices consequat, ipsum felis condimentum turpis, sed vestibulum justo dui et odio. Aliquam erat volutpat.</p>
-    <a class="btn btn-primary" href="#">Read More</a>
-  </article>
+    def student_info(self):
+        return f"Student ID: {self.student_id}"
+
+# Creating an object of the Student class
+student1 = Student("Bob", 22, "S12345")
+print(student1.greet())         # Output: Hello, my name is Bob and I am 22 years old.
+print(student1.student_info())  # Output: Student ID: S12345</code></pre>
+    </div>
+    
+    <p>Here, the `Student` class inherits from the `Person` class and adds a new attribute `student_id` and a method `student_info`.</p>
+    
+    <h2>3. Encapsulation</h2>
+    <p>Encapsulation involves bundling the data (attributes) and methods that operate on the data into a single unit (class) and restricting access to some of the object's components. Here’s an example:</p>
+    
+    <div class="code-highlight">
+      <pre><code class="language-python">class Account:
+    def __init__(self, account_number, balance):
+        self.__account_number = account_number  # Private attribute
+        self.__balance = balance  # Private attribute
+
+    def deposit(self, amount):
+        if amount > 0:
+            self.__balance += amount
+            return f"Deposited {amount}. New balance: {self.__balance}"
+        return "Invalid amount"
+
+    def get_balance(self):
+        return self.__balance
+
+# Creating an object of the Account class
+account = Account("123456789", 1000)
+print(account.deposit(500))   # Output: Deposited 500. New balance: 1500
+print(account.get_balance()) # Output: 1500</code></pre>
+    </div>
+    
+    <p>The `Account` class uses private attributes (prefixing with `__`) to restrict direct access to the balance and account number. Methods like `deposit` and `get_balance` provide controlled access to these attributes.</p>
+  </div>
 </section>
 
 </body>
