@@ -31,3 +31,19 @@
     vertical-align: middle; /* Align the icon with the text */
     margin-right: 5px; /* Space between icon and text */
 }
+
+/* School icon */
+.image-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 20px;
+}
+.image-container a {
+            margin: 0 10px;
+}
+.image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px; /* Optional: Rounded corners */
+}
