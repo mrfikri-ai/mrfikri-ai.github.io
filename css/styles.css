@@ -41,6 +41,17 @@ footer {
 }
 
 /* School icon */
+.image-container {
+    display: flex;
+    flex-wrap: wrap; /* Allows images to wrap onto the next line if needed */
+    justify-content: center; /* Center align images horizontally */
+    gap: 10px; /* Space between images */
+    margin-top: 10px; /* Reduce space above images */
+}
+
+.image-container a {
+    display: block; /* Ensure each link is a block element */
+}
 .img-ugm {
     width: 150px;
     height: auto;
