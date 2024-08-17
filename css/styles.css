@@ -47,3 +47,14 @@
             height: auto;
             border-radius: 8px; /* Optional: Rounded corners */
 }
+
+/* Style the footer */
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #f8f9fa;
+            position: fixed;  /* Stay at the bottom of the page */
+            left: 0;
+            bottom: 0;
+            width: 100%;  /* Full width */
+}
