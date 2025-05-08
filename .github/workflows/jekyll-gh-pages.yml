@@ -36,8 +36,11 @@ jobs:
           source: ./
           destination: ./_site
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
-        
+        # --- CHANGE THIS LINE ---
+        # Change the version from v4 to v3 for upload-pages-artifact
+        uses: actions/upload-pages-artifact@v3
+        # -----------------------
+
   # Deployment job
   deploy:
     environment:
@@ -48,4 +51,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v4 # Keep this at v4 as it's the latest for deploy-pages
