@@ -22,6 +22,10 @@
         .container {
             max-width: 900px;
         }
+        .demo-section {
+            background-color: #e9ecef;
+            border: 1px solid #dee2e6;
+        }
     </style>
 </head>
 <body>
@@ -39,8 +43,20 @@
     </div>
 </nav>
 
-<section id="blog" class="p-5 bg-light">
+<section id="blog" class="p-5">
     <div class="container">
+        
+        <!-- NEW SECTION FOR THE DEMO -->
+        <div class="p-4 mb-5 rounded-3 demo-section text-center">
+            <h2 class="mb-3">Interactive Pathfinding Demo</h2>
+            <p class="lead">
+                Explore an interactive implementation of point generation, K-Means clustering, and pathfinding algorithms. 
+            </p>
+            <a href="pathfinding-demo.html" target="_blank" class="btn btn-primary btn-lg">
+                Open Demo in New Window
+            </a>
+        </div>
+
         <h1 class="text-center mb-4">Understanding Object-Oriented Programming in Python</h1>
         <p class="lead">In this blog post, we'll explore the principles of Object-Oriented Programming (OOP) in Python. We'll cover the basics of classes, objects, inheritance, and encapsulation through examples.</p>
 
@@ -90,7 +106,7 @@ print(student1.student_info())  # Output: Student ID: S12345</code></pre>
             <pre><code class="language-python">class Account:
     def __init__(self, account_number, balance):
         self.__account_number = account_number  # Private attribute
-        self.__balance = balance  # Private attribute
+        self. __balance = balance  # Private attribute
 
     def deposit(self, amount):
         if amount > 0:
