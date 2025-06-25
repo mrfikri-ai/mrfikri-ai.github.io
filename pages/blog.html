@@ -25,6 +25,12 @@
         .demo-section {
             background-color: #e9ecef;
             border: 1px solid #dee2e6;
+            height: 100%; /* Make cards in a row the same height */
+            display: flex;
+            flex-direction: column;
+        }
+        .demo-section .btn {
+            margin-top: auto; /* Push button to the bottom */
         }
     </style>
 </head>
@@ -46,16 +52,38 @@
 <section id="blog" class="p-5">
     <div class="container">
         
-        <!-- NEW SECTION FOR THE DEMO -->
-        <div class="p-4 mb-5 rounded-3 demo-section text-center">
-            <h2 class="mb-3">Interactive Pathfinding Demo</h2>
-            <p class="lead">
-                Explore an interactive implementation of point generation, K-Means clustering, and pathfinding algorithms. 
-            </p>
-            <a href="pathfinding-demo.html" target="_blank" class="btn btn-primary btn-lg">
-                Open Demo in New Window
-            </a>
+        <!-- Interactive Demos Section -->
+        <div class="mb-5">
+            <h2 class="text-center mb-4">Interactive Demos & Projects</h2>
+            <div class="row g-4">
+                <!-- Pathfinding Demo Card -->
+                <div class="col-lg-6">
+                    <div class="p-4 rounded-3 demo-section text-center">
+                        <h4 class="mb-3">Pathfinding & Clustering Demo</h4>
+                        <p>
+                            An interactive tool for generating point clouds, clustering them with K-Means, and finding efficient coverage paths.
+                        </p>
+                        <a href="pathfinding-demo.html" target="_blank" class="btn btn-primary">
+                            Open Pathfinding Demo
+                        </a>
+                    </div>
+                </div>
+                <!-- Fourier Demo Card -->
+                <div class="col-lg-6">
+                    <div class="p-4 rounded-3 demo-section text-center">
+                        <h4 class="mb-3">Fourier Drawing Demo</h4>
+                        <p>
+                           A visualization of how complex shapes can be deconstructed and redrawn using a series of rotating vectors (epicycles).
+                        </p>
+                        <a href="fourier-drawing-demo.html" target="_blank" class="btn btn-secondary">
+                            Open Fourier Demo
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <hr class="my-5">
 
         <h1 class="text-center mb-4">Understanding Object-Oriented Programming in Python</h1>
         <p class="lead">In this blog post, we'll explore the principles of Object-Oriented Programming (OOP) in Python. We'll cover the basics of classes, objects, inheritance, and encapsulation through examples.</p>
