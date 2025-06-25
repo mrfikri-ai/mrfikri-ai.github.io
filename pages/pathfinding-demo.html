@@ -12,6 +12,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa; /* Consistent bg-light from Bootstrap */
         }
         canvas {
             background-color: #fff;
@@ -47,12 +48,15 @@
         }
     </style>
 </head>
-<body class="bg-light">
+<body>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">Muhamad Rausyan Fikri</a>
-        <div class="collapse navbar-collapse">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
                 <li class="nav-item"><a class="nav-link" href="research.html">Research</a></li>
@@ -115,6 +119,7 @@
     </div>
 </section>
 
+    <!-- App Logic Script -->
     <script>
         // --- DOM Elements ---
         const canvas = document.getElementById('canvas');
@@ -135,13 +140,12 @@
         let assignments = [];
         let centroids = [];
         let hulls = [];
-        let coveragePaths = []; // NEW: To store coverage paths for each cluster
+        let coveragePaths = [];
         const CLUSTER_COLORS = [ '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6' ];
 
         // --- Algorithms ---
 
         function generatePoissonDiskSamples(width, height, r, k = 30) {
-            // ... (Poisson disk implementation remains unchanged) ...
              const cellSize = r / Math.sqrt(2);
             const gridWidth = Math.ceil(width / cellSize);
             const gridHeight = Math.ceil(height / cellSize);
@@ -196,7 +200,6 @@
         }
 
         function kmeans(dataPoints, k) {
-            // ... (K-Means implementation remains unchanged) ...
             if (dataPoints.length < k) {
                  statusTextEl.textContent = `Error: Cannot have more clusters (${k}) than points (${dataPoints.length}).`;
                  return null;
@@ -235,7 +238,6 @@
         }
         
         function getConvexHull(hullPoints) {
-            // ... (Convex Hull implementation remains unchanged) ...
             if (hullPoints.length <= 2) { return hullPoints; }
             hullPoints.sort((a, b) => a.x - b.x || a.y - b.y);
             const cross_product = (p1, p2, p3) => (p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x);
@@ -263,7 +265,7 @@
             canvas.width = size; canvas.height = size;
             scale = (width > 0 && height > 0) ? Math.min(canvas.width / width, canvas.height / height) : 1;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#f7fafc'; ctx.fillRect(0, 0, width * scale, height * scale);
+            ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, width * scale, height * scale);
             ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1; ctx.strokeRect(0, 0, width * scale, height * scale);
             
             hulls.forEach((hull, i) => {
@@ -277,7 +279,6 @@
                 }
             });
 
-            // Draw coverage paths
             coveragePaths.forEach((path, i) => {
                 if(path.length > 1) {
                     const color = CLUSTER_COLORS[i % CLUSTER_COLORS.length];
@@ -286,16 +287,12 @@
                     ctx.beginPath();
                     ctx.moveTo(path[0].x * scale, path[0].y * scale);
                     for (let j = 1; j < path.length; j++) {
-                        const p1 = path[j-1];
-                        const p2 = path[j];
-                        ctx.lineTo(p2.x * scale, p2.y * scale);
+                        ctx.lineTo(path[j].x * scale, path[j].y * scale);
                     }
                     ctx.stroke();
 
-                    // Draw arrows
                     for (let j = 1; j < path.length; j++) {
-                        const p1 = path[j - 1];
-                        const p2 = path[j];
+                        const p1 = path[j - 1], p2 = path[j];
                         const midX = (p1.x + p2.x) / 2 * scale;
                         const midY = (p1.y + p2.y) / 2 * scale;
                         const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
@@ -308,7 +305,7 @@
                 ctx.fillStyle = assignments[i] !== undefined ? CLUSTER_COLORS[assignments[i] % CLUSTER_COLORS.length] : '#374151';
                 ctx.beginPath(); ctx.arc(p.x * scale, p.y * scale, 3, 0, 2 * Math.PI); ctx.fill();
             });
-            // Draw special markers for start and end points
+            
             coveragePaths.forEach((path, i) => {
                 const color = CLUSTER_COLORS[i % CLUSTER_COLORS.length];
                 if (path.length > 0) {
@@ -336,7 +333,7 @@
         }
         
         function drawArrow(x, y, angle, color) {
-            const headlen = 5; // length of arrow head in pixels
+            const headlen = 5;
             ctx.fillStyle = color;
             ctx.save();
             ctx.translate(x, y);
@@ -352,10 +349,8 @@
 
         function drawStar(cx, cy, spikes, outerRadius, innerRadius, color) {
             let rot = Math.PI / 2 * 3;
-            let x = cx;
-            let y = cy;
+            let x = cx, y = cy;
             let step = Math.PI / spikes;
-
             ctx.beginPath();
             ctx.moveTo(cx, cy - outerRadius);
             for (let i = 0; i < spikes; i++) {
@@ -363,7 +358,6 @@
                 y = cy + Math.sin(rot) * outerRadius;
                 ctx.lineTo(x, y);
                 rot += step;
-
                 x = cx + Math.cos(rot) * innerRadius;
                 y = cy + Math.sin(rot) * innerRadius;
                 ctx.lineTo(x, y);
@@ -384,7 +378,7 @@
             const percentage = parseFloat(percentageInput.value); const area = width * height;
             const targetPoints = Math.ceil(area * (percentage / 100));
             if (isNaN(width) || isNaN(height) || isNaN(percentage) || width <= 0 || height <= 0 || targetPoints <= 0) {
-                statusTextEl.textContent = 'Error: Invalid input values for point generation.'; return;
+                statusTextEl.textContent = 'Error: Invalid input values.'; return;
             }
             assignments = []; centroids = []; hulls = []; coveragePaths = [];
             const generationTarget = Math.max(targetPoints, 2) * 1.5;
@@ -406,8 +400,8 @@
         function handleCluster() {
              const k = parseInt(kValueInput.value);
              if (points.length === 0) { statusTextEl.textContent = 'Please generate points first.'; return; }
-             if (isNaN(k) || k <= 0) { statusTextEl.textContent = 'Error: Number of clusters (K) must be a positive number.'; return; }
-             coveragePaths = []; // Clear old paths if re-clustering
+             if (isNaN(k) || k <= 0) { statusTextEl.textContent = 'Error: K must be a positive number.'; return; }
+             coveragePaths = [];
              statusTextEl.textContent = `Clustering into ${k} groups...`;
              setTimeout(() => {
                 const result = kmeans(points, k);
@@ -424,36 +418,26 @@
              }, 10);
         }
 
-        // NEW: Handler for generating coverage paths
         function handlePathGeneration() {
-            if (centroids.length === 0) {
-                statusTextEl.textContent = 'Please find clusters first.';
-                return;
-            }
+            if (centroids.length === 0) { statusTextEl.textContent = 'Please find clusters first.'; return; }
             statusTextEl.textContent = 'Generating coverage trajectories...';
             setTimeout(() => {
                 coveragePaths = [];
                 const distSq = (p1, p2) => (p1.x - p2.x)**2 + (p1.y - p2.y)**2;
-
                 for (let i = 0; i < centroids.length; i++) {
                     const clusterPoints = points.filter((_, idx) => assignments[idx] === i);
                     if (clusterPoints.length < 2) {
                         coveragePaths.push(clusterPoints);
                         continue;
                     }
-                    
                     let path = [];
                     let unvisited = [...clusterPoints];
-                    
-                    // Start with the top-most point
                     unvisited.sort((a,b) => a.y - b.y || a.x - b.x);
                     let currentPoint = unvisited.shift();
                     path.push(currentPoint);
-
                     while (unvisited.length > 0) {
                         let nearestIndex = -1;
                         let minDistanceSq = Infinity;
-
                         for (let j = 0; j < unvisited.length; j++) {
                             const dSq = distSq(currentPoint, unvisited[j]);
                             if (dSq < minDistanceSq) {
@@ -474,10 +458,12 @@
         generateBtn.addEventListener('click', handleGenerate);
         clusterBtn.addEventListener('click', handleCluster);
         pathBtn.addEventListener('click', handlePathGeneration);
-
         percentageInput.addEventListener('input', () => { percentageValueEl.textContent = percentageInput.value; });
         window.addEventListener('resize', draw);
         window.onload = handleGenerate;
     </script>
+    
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
