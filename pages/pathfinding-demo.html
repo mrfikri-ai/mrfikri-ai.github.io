@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poisson Disk Sampling with K-Means Clustering</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        canvas {
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 0.5rem;
+            cursor: default;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #4f46e5;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #4f46e5;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-4xl bg-white p-6 md:p-8 rounded-xl shadow-lg">
+        <div class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Pathfinding Demo</h1>
+            <p class="mt-2 text-gray-600">Generate points, group them into clusters, and find coverage paths.</p>
+        </div>
+
+        <!-- Controls -->
+        <div class="space-y-4 mb-6 p-4 bg-gray-50 rounded-lg border">
+             <!-- Point Generation Controls -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
+                <div>
+                    <label for="width" class="block text-sm font-medium text-gray-700">Width</label>
+                    <input type="number" id="width" value="20" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
+                </div>
+                <div>
+                    <label for="height" class="block text-sm font-medium text-gray-700">Height</label>
+                    <input type="number" id="height" value="20" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
+                </div>
+                <div class="sm:col-span-2">
+                    <label for="percentage" class="block text-sm font-medium text-gray-700">Point Density (<span id="percentageValue">20</span>%)</label>
+                    <input type="range" id="percentage" min="1" max="100" value="20" class="mt-2 block w-full">
+                </div>
+            </div>
+             <!-- K-Means Controls -->
+            <div class="pt-4 border-t">
+                 <label for="kValue" class="block text-sm font-medium text-gray-700">Number of Clusters (K)</label>
+                 <input type="number" id="kValue" value="3" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
+            </div>
+        </div>
+
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+            <button id="generateBtn" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                1. Generate Points
+            </button>
+            <button id="clusterBtn" class="flex-1 sm:flex-none bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                2. Find Clusters
+            </button>
+            <button id="pathBtn" class="flex-1 sm:flex-none bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                3. Generate Trajectories
+            </button>
+        </div>
+        <p id="statusText" class="text-center text-sm text-gray-600 font-mono h-6"></p>
+
+
+        <!-- Canvas Container -->
+        <div class="w-full aspect-square max-h-[70vh] mx-auto">
+            <canvas id="canvas"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const generateBtn = document.getElementById('generateBtn');
+        const clusterBtn = document.getElementById('clusterBtn');
+        const pathBtn = document.getElementById('pathBtn');
+        const statusTextEl = document.getElementById('statusText');
+        const widthInput = document.getElementById('width');
+        const heightInput = document.getElementById('height');
+        const percentageInput = document.getElementById('percentage');
+        const percentageValueEl = document.getElementById('percentageValue');
+        const kValueInput = document.getElementById('kValue');
+
+        // --- State Variables ---
+        let points = [];
+        let scale = 1;
+        let assignments = [];
+        let centroids = [];
+        let hulls = [];
+        let coveragePaths = [];
+        const CLUSTER_COLORS = [ '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6' ];
+
+        // --- Algorithms (unchanged) ---
+
+        function generatePoissonDiskSamples(width, height, r, k = 30) {
+             const cellSize = r / Math.sqrt(2);
+            const gridWidth = Math.ceil(width / cellSize);
+            const gridHeight = Math.ceil(height / cellSize);
+            const grid = new Array(gridWidth * gridHeight).fill(-1);
+            const points = [];
+            const activeList = [];
+            if (width === 0 || height === 0) return [];
+            const p0 = { x: Math.random() * width, y: Math.random() * height };
+            const startIdx = points.push(p0) - 1;
+            activeList.push(startIdx);
+            const gridX = Math.floor(p0.x / cellSize);
+            const gridY = Math.floor(p0.y / cellSize);
+            grid[gridY * gridWidth + gridX] = startIdx;
+            while (activeList.length > 0) {
+                const activeListIndex = Math.floor(Math.random() * activeList.length);
+                const pointIndex = activeList[activeListIndex];
+                const currentPoint = points[pointIndex];
+                let foundCandidate = false;
+                for (let i = 0; i < k; i++) {
+                    const angle = Math.random() * 2 * Math.PI;
+                    const dist = Math.random() * r + r; 
+                    const newPoint = { x: currentPoint.x + Math.cos(angle) * dist, y: currentPoint.y + Math.sin(angle) * dist };
+                    if (newPoint.x >= 0 && newPoint.x < width && newPoint.y >= 0 && newPoint.y < height) {
+                        const newGridX = Math.floor(newPoint.x / cellSize);
+                        const newGridY = Math.floor(newPoint.y / cellSize);
+                        let isValid = true;
+                        for (let ny = -2; ny <= 2; ny++) {
+                            for (let nx = -2; nx <= 2; nx++) {
+                                const checkGridX = newGridX + nx;
+                                const checkGridY = newGridY + ny;
+                                if (checkGridX >= 0 && checkGridX < gridWidth && checkGridY >= 0 && checkGridY < gridHeight) {
+                                    const neighborIndex = grid[checkGridY * gridWidth + checkGridX];
+                                    if (neighborIndex !== -1) {
+                                        const neighborPoint = points[neighborIndex];
+                                        const dSq = (newPoint.x - neighborPoint.x)**2 + (newPoint.y - neighborPoint.y)**2;
+                                        if (dSq < r * r) { isValid = false; break; }
+                                    }
+                                }
+                            }
+                            if (!isValid) break;
+                        }
+                        if (isValid) {
+                            points.push(newPoint); activeList.push(points.length - 1);
+                            grid[newGridY * gridWidth + newGridX] = points.length - 1;
+                            foundCandidate = true;
+                        }
+                    }
+                }
+                if (!foundCandidate) { activeList.splice(activeListIndex, 1); }
+            }
+            return points;
+        }
+
+        function kmeans(dataPoints, k) {
+            if (dataPoints.length < k) {
+                 statusTextEl.textContent = `Error: Cannot have more clusters (${k}) than points (${dataPoints.length}).`;
+                 return null;
+            }
+            let newCentroids = [...dataPoints].sort(() => 0.5 - Math.random()).slice(0, k);
+            let oldCentroids = [];
+            let newAssignments = new Array(dataPoints.length).fill(0);
+            let iterations = 0;
+            const distSq = (p1, p2) => (p1.x - p2.x)**2 + (p1.y - p2.y)**2;
+            while (JSON.stringify(newCentroids) !== JSON.stringify(oldCentroids) && iterations < 100) {
+                 oldCentroids = JSON.parse(JSON.stringify(newCentroids));
+                 for(let i=0; i < dataPoints.length; i++) {
+                     let bestDist = Infinity;
+                     for(let j=0; j < k; j++) {
+                         const d = distSq(dataPoints[i], newCentroids[j]);
+                         if (d < bestDist) { bestDist = d; newAssignments[i] = j; }
+                     }
+                 }
+                 const sums = Array.from({ length: k }, () => ({ x: 0, y: 0, count: 0 }));
+                 for(let i=0; i < dataPoints.length; i++) {
+                     const clusterIndex = newAssignments[i];
+                     sums[clusterIndex].x += dataPoints[i].x;
+                     sums[clusterIndex].y += dataPoints[i].y;
+                     sums[clusterIndex].count++;
+                 }
+                 for(let j=0; j < k; j++) {
+                     if (sums[j].count > 0) {
+                         newCentroids[j] = { x: sums[j].x / sums[j].count, y: sums[j].y / sums[j].count };
+                     } else {
+                         newCentroids[j] = dataPoints[Math.floor(Math.random() * dataPoints.length)];
+                     }
+                 }
+                 iterations++;
+            }
+            return { assignments: newAssignments, centroids: newCentroids };
+        }
+        
+        function getConvexHull(hullPoints) {
+            if (hullPoints.length <= 2) { return hullPoints; }
+            hullPoints.sort((a, b) => a.x - b.x || a.y - b.y);
+            const cross_product = (p1, p2, p3) => (p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x);
+            const lower_hull = [];
+            for (const p of hullPoints) {
+                while (lower_hull.length >= 2 && cross_product(lower_hull[lower_hull.length-2], lower_hull[lower_hull.length-1], p) <= 0) { lower_hull.pop(); }
+                lower_hull.push(p);
+            }
+            const upper_hull = [];
+            for (let i = hullPoints.length - 1; i >= 0; i--) {
+                const p = hullPoints[i];
+                while (upper_hull.length >= 2 && cross_product(upper_hull[upper_hull.length-2], upper_hull[upper_hull.length-1], p) <= 0) { upper_hull.pop(); }
+                upper_hull.push(p);
+            }
+            lower_hull.pop(); upper_hull.pop();
+            return lower_hull.concat(upper_hull);
+        }
+
+        // --- Drawing ---
+        function draw() {
+            const width = parseFloat(widthInput.value);
+            const height = parseFloat(heightInput.value);
+            const container = canvas.parentElement;
+            const size = Math.min(container.clientWidth, container.clientHeight);
+            canvas.width = size; canvas.height = size;
+            scale = (width > 0 && height > 0) ? Math.min(canvas.width / width, canvas.height / height) : 1;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#f7fafc'; ctx.fillRect(0, 0, width * scale, height * scale);
+            ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1; ctx.strokeRect(0, 0, width * scale, height * scale);
+            
+            // Draw hulls first
+            hulls.forEach((hull, i) => {
+                if (hull.length > 1) {
+                    const color = CLUSTER_COLORS[i % CLUSTER_COLORS.length];
+                    const fillColor = color + '33';
+                    ctx.fillStyle = fillColor; ctx.strokeStyle = color; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.moveTo(hull[0].x * scale, hull[0].y * scale);
+                    for (let j = 1; j < hull.length; j++) { ctx.lineTo(hull[j].x * scale, hull[j].y * scale); }
+                    ctx.closePath(); ctx.fill(); ctx.stroke();
+                }
+            });
+
+            // Draw all generic points
+            points.forEach((p, i) => {
+                ctx.fillStyle = assignments[i] !== undefined ? CLUSTER_COLORS[assignments[i] % CLUSTER_COLORS.length] : '#374151';
+                ctx.beginPath(); ctx.arc(p.x * scale, p.y * scale, 3, 0, 2 * Math.PI); ctx.fill();
+            });
+
+            // Draw coverage paths and special markers over the points
+            coveragePaths.forEach((path, i) => {
+                const color = CLUSTER_COLORS[i % CLUSTER_COLORS.length];
+                // Draw path lines and arrows
+                if(path.length > 1) {
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.moveTo(path[0].x * scale, path[0].y * scale);
+                    for (let j = 1; j < path.length; j++) {
+                        ctx.lineTo(path[j].x * scale, path[j].y * scale);
+                    }
+                    ctx.stroke();
+
+                    for (let j = 1; j < path.length; j++) {
+                        const p1 = path[j - 1], p2 = path[j];
+                        const midX = (p1.x + p2.x) / 2 * scale;
+                        const midY = (p1.y + p2.y) / 2 * scale;
+                        const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+                        drawArrow(midX, midY, angle, color);
+                    }
+                }
+                
+                // Draw special markers for start and end points
+                if (path.length > 0) {
+                    // Mark initial position with a larger circle
+                    const startPoint = path[0];
+                    ctx.fillStyle = color;
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(startPoint.x * scale, startPoint.y * scale, 5, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Mark goal with a star
+                    if (path.length > 1) {
+                        const endPoint = path[path.length - 1];
+                        drawStar(endPoint.x * scale, endPoint.y * scale, 5, 8, 4, color);
+                    }
+                }
+            });
+
+            // Draw centroids on top
+            centroids.forEach((c, i) => {
+                ctx.fillStyle = CLUSTER_COLORS[i % CLUSTER_COLORS.length];
+                ctx.strokeStyle = 'white'; ctx.lineWidth = 2; const centroidSize = 8;
+                ctx.fillRect(c.x * scale - centroidSize / 2, c.y * scale - centroidSize / 2, centroidSize, centroidSize);
+                ctx.strokeRect(c.x * scale - centroidSize / 2, c.y * scale - centroidSize / 2, centroidSize, centroidSize);
+            });
+        }
+        
+        function drawArrow(x, y, angle, color) {
+            const headlen = 5;
+            ctx.fillStyle = color;
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-headlen, -headlen/2);
+            ctx.lineTo(-headlen, headlen/2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // NEW: Function to draw a star
+        function drawStar(cx, cy, spikes, outerRadius, innerRadius, color) {
+            let rot = Math.PI / 2 * 3;
+            let x = cx;
+            let y = cy;
+            let step = Math.PI / spikes;
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - outerRadius);
+            for (let i = 0; i < spikes; i++) {
+                x = cx + Math.cos(rot) * outerRadius;
+                y = cy + Math.sin(rot) * outerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+
+                x = cx + Math.cos(rot) * innerRadius;
+                y = cy + Math.sin(rot) * innerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+            }
+            ctx.lineTo(cx, cy - outerRadius);
+            ctx.closePath();
+            ctx.lineWidth=2;
+            ctx.strokeStyle='white';
+            ctx.stroke();
+            ctx.fillStyle=color;
+            ctx.fill();
+        }
+
+        // --- Event Handlers ---
+        function handleGenerate() {
+            const width = parseFloat(widthInput.value); const height = parseFloat(heightInput.value);
+            const percentage = parseFloat(percentageInput.value); const area = width * height;
+            const targetPoints = Math.ceil(area * (percentage / 100));
+            if (isNaN(width) || isNaN(height) || isNaN(percentage) || width <= 0 || height <= 0 || targetPoints <= 0) {
+                statusTextEl.textContent = 'Error: Invalid input values for point generation.'; return;
+            }
+            assignments = []; centroids = []; hulls = []; coveragePaths = [];
+            const generationTarget = Math.max(targetPoints, 2) * 1.5;
+            const packingDensity = 0.9069;
+            const estimatedR = Math.sqrt((area * packingDensity) / generationTarget);
+            statusTextEl.textContent = `Generating (Target: ${targetPoints} points)...`;
+            setTimeout(() => {
+                let candidatePoints = generatePoissonDiskSamples(width, height, estimatedR);
+                for (let i = candidatePoints.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [candidatePoints[i], candidatePoints[j]] = [candidatePoints[j], candidatePoints[i]];
+                }
+                points = candidatePoints.slice(0, targetPoints);
+                statusTextEl.textContent = `Generated ${points.length} points. Ready to cluster.`;
+                draw();
+            }, 10);
+        }
+
+        function handleCluster() {
+             const k = parseInt(kValueInput.value);
+             if (points.length === 0) { statusTextEl.textContent = 'Please generate points first.'; return; }
+             if (isNaN(k) || k <= 0) { statusTextEl.textContent = 'Error: Number of clusters (K) must be a positive number.'; return; }
+             coveragePaths = []; // Clear old paths if re-clustering
+             statusTextEl.textContent = `Clustering into ${k} groups...`;
+             setTimeout(() => {
+                const result = kmeans(points, k);
+                if (result) {
+                    assignments = result.assignments; centroids = result.centroids;
+                    hulls = [];
+                    for(let i=0; i<k; i++) {
+                        const clusterPoints = points.filter((_, idx) => assignments[idx] === i);
+                        hulls.push(getConvexHull(clusterPoints));
+                    }
+                    statusTextEl.textContent = `Clustering complete. Found ${centroids.length} clusters.`;
+                    draw();
+                }
+             }, 10);
+        }
+
+        function handlePathGeneration() {
+            if (centroids.length === 0) {
+                statusTextEl.textContent = 'Please find clusters first.';
+                return;
+            }
+            statusTextEl.textContent = 'Generating coverage trajectories...';
+            setTimeout(() => {
+                coveragePaths = [];
+                const distSq = (p1, p2) => (p1.x - p2.x)**2 + (p1.y - p2.y)**2;
+
+                for (let i = 0; i < centroids.length; i++) {
+                    const clusterPoints = points.filter((_, idx) => assignments[idx] === i);
+                    if (clusterPoints.length === 0) {
+                        coveragePaths.push([]); // Add empty path for empty clusters
+                        continue;
+                    }
+                    
+                    let path = [];
+                    let unvisited = [...clusterPoints];
+                    
+                    unvisited.sort((a,b) => a.y - b.y || a.x - b.x);
+                    let currentPoint = unvisited.shift();
+                    path.push(currentPoint);
+
+                    while (unvisited.length > 0) {
+                        let nearestIndex = -1;
+                        let minDistanceSq = Infinity;
+                        for (let j = 0; j < unvisited.length; j++) {
+                            const dSq = distSq(currentPoint, unvisited[j]);
+                            if (dSq < minDistanceSq) {
+                                minDistanceSq = dSq;
+                                nearestIndex = j;
+                            }
+                        }
+                        currentPoint = unvisited.splice(nearestIndex, 1)[0];
+                        path.push(currentPoint);
+                    }
+                    coveragePaths.push(path);
+                }
+                statusTextEl.textContent = 'Coverage trajectories generated.';
+                draw();
+            }, 10);
+        }
+
+        generateBtn.addEventListener('click', handleGenerate);
+        clusterBtn.addEventListener('click', handleCluster);
+        pathBtn.addEventListener('click', handlePathGeneration);
+
+        percentageInput.addEventListener('input', () => { percentageValueEl.textContent = percentageInput.value; });
+        window.addEventListener('resize', draw);
+        window.onload = handleGenerate;
+    </script>
+</body>
+</html>
