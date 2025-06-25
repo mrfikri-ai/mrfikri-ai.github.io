@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Poisson Disk Sampling with K-Means Clustering</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
@@ -46,9 +47,23 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 flex flex-col items-center justify-center min-h-screen p-4">
+<body class="bg-light">
 
-    <div class="w-full max-w-4xl bg-white p-6 md:p-8 rounded-xl shadow-lg">
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Muhamad Rausyan Fikri</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="research.html">Research</a></li>
+                <li class="nav-item"><a class="nav-link" href="blog.html">Blog</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<section class="p-4 p-md-5">
+    <div class="w-full max-w-4xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
         <div class="text-center mb-6">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Pathfinding Demo</h1>
             <p class="mt-2 text-gray-600">Generate points, group them into clusters, and find coverage paths.</p>
@@ -98,6 +113,7 @@
             <canvas id="canvas"></canvas>
         </div>
     </div>
+</section>
 
     <script>
         // --- DOM Elements ---
@@ -119,12 +135,13 @@
         let assignments = [];
         let centroids = [];
         let hulls = [];
-        let coveragePaths = [];
+        let coveragePaths = []; // NEW: To store coverage paths for each cluster
         const CLUSTER_COLORS = [ '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6' ];
 
-        // --- Algorithms (unchanged) ---
+        // --- Algorithms ---
 
         function generatePoissonDiskSamples(width, height, r, k = 30) {
+            // ... (Poisson disk implementation remains unchanged) ...
              const cellSize = r / Math.sqrt(2);
             const gridWidth = Math.ceil(width / cellSize);
             const gridHeight = Math.ceil(height / cellSize);
@@ -179,6 +196,7 @@
         }
 
         function kmeans(dataPoints, k) {
+            // ... (K-Means implementation remains unchanged) ...
             if (dataPoints.length < k) {
                  statusTextEl.textContent = `Error: Cannot have more clusters (${k}) than points (${dataPoints.length}).`;
                  return null;
@@ -217,6 +235,7 @@
         }
         
         function getConvexHull(hullPoints) {
+            // ... (Convex Hull implementation remains unchanged) ...
             if (hullPoints.length <= 2) { return hullPoints; }
             hullPoints.sort((a, b) => a.x - b.x || a.y - b.y);
             const cross_product = (p1, p2, p3) => (p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x);
@@ -247,7 +266,6 @@
             ctx.fillStyle = '#f7fafc'; ctx.fillRect(0, 0, width * scale, height * scale);
             ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1; ctx.strokeRect(0, 0, width * scale, height * scale);
             
-            // Draw hulls first
             hulls.forEach((hull, i) => {
                 if (hull.length > 1) {
                     const color = CLUSTER_COLORS[i % CLUSTER_COLORS.length];
@@ -259,38 +277,41 @@
                 }
             });
 
-            // Draw all generic points
-            points.forEach((p, i) => {
-                ctx.fillStyle = assignments[i] !== undefined ? CLUSTER_COLORS[assignments[i] % CLUSTER_COLORS.length] : '#374151';
-                ctx.beginPath(); ctx.arc(p.x * scale, p.y * scale, 3, 0, 2 * Math.PI); ctx.fill();
-            });
-
-            // Draw coverage paths and special markers over the points
+            // Draw coverage paths
             coveragePaths.forEach((path, i) => {
-                const color = CLUSTER_COLORS[i % CLUSTER_COLORS.length];
-                // Draw path lines and arrows
                 if(path.length > 1) {
+                    const color = CLUSTER_COLORS[i % CLUSTER_COLORS.length];
                     ctx.strokeStyle = color;
                     ctx.lineWidth = 1.5;
                     ctx.beginPath();
                     ctx.moveTo(path[0].x * scale, path[0].y * scale);
                     for (let j = 1; j < path.length; j++) {
-                        ctx.lineTo(path[j].x * scale, path[j].y * scale);
+                        const p1 = path[j-1];
+                        const p2 = path[j];
+                        ctx.lineTo(p2.x * scale, p2.y * scale);
                     }
                     ctx.stroke();
 
+                    // Draw arrows
                     for (let j = 1; j < path.length; j++) {
-                        const p1 = path[j - 1], p2 = path[j];
+                        const p1 = path[j - 1];
+                        const p2 = path[j];
                         const midX = (p1.x + p2.x) / 2 * scale;
                         const midY = (p1.y + p2.y) / 2 * scale;
                         const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
                         drawArrow(midX, midY, angle, color);
                     }
                 }
-                
-                // Draw special markers for start and end points
+            });
+
+            points.forEach((p, i) => {
+                ctx.fillStyle = assignments[i] !== undefined ? CLUSTER_COLORS[assignments[i] % CLUSTER_COLORS.length] : '#374151';
+                ctx.beginPath(); ctx.arc(p.x * scale, p.y * scale, 3, 0, 2 * Math.PI); ctx.fill();
+            });
+            // Draw special markers for start and end points
+            coveragePaths.forEach((path, i) => {
+                const color = CLUSTER_COLORS[i % CLUSTER_COLORS.length];
                 if (path.length > 0) {
-                    // Mark initial position with a larger circle
                     const startPoint = path[0];
                     ctx.fillStyle = color;
                     ctx.strokeStyle = 'white';
@@ -299,8 +320,6 @@
                     ctx.arc(startPoint.x * scale, startPoint.y * scale, 5, 0, 2 * Math.PI);
                     ctx.fill();
                     ctx.stroke();
-
-                    // Mark goal with a star
                     if (path.length > 1) {
                         const endPoint = path[path.length - 1];
                         drawStar(endPoint.x * scale, endPoint.y * scale, 5, 8, 4, color);
@@ -308,7 +327,6 @@
                 }
             });
 
-            // Draw centroids on top
             centroids.forEach((c, i) => {
                 ctx.fillStyle = CLUSTER_COLORS[i % CLUSTER_COLORS.length];
                 ctx.strokeStyle = 'white'; ctx.lineWidth = 2; const centroidSize = 8;
@@ -318,7 +336,7 @@
         }
         
         function drawArrow(x, y, angle, color) {
-            const headlen = 5;
+            const headlen = 5; // length of arrow head in pixels
             ctx.fillStyle = color;
             ctx.save();
             ctx.translate(x, y);
@@ -332,7 +350,6 @@
             ctx.restore();
         }
 
-        // NEW: Function to draw a star
         function drawStar(cx, cy, spikes, outerRadius, innerRadius, color) {
             let rot = Math.PI / 2 * 3;
             let x = cx;
@@ -407,6 +424,7 @@
              }, 10);
         }
 
+        // NEW: Handler for generating coverage paths
         function handlePathGeneration() {
             if (centroids.length === 0) {
                 statusTextEl.textContent = 'Please find clusters first.';
@@ -419,14 +437,15 @@
 
                 for (let i = 0; i < centroids.length; i++) {
                     const clusterPoints = points.filter((_, idx) => assignments[idx] === i);
-                    if (clusterPoints.length === 0) {
-                        coveragePaths.push([]); // Add empty path for empty clusters
+                    if (clusterPoints.length < 2) {
+                        coveragePaths.push(clusterPoints);
                         continue;
                     }
                     
                     let path = [];
                     let unvisited = [...clusterPoints];
                     
+                    // Start with the top-most point
                     unvisited.sort((a,b) => a.y - b.y || a.x - b.x);
                     let currentPoint = unvisited.shift();
                     path.push(currentPoint);
@@ -434,6 +453,7 @@
                     while (unvisited.length > 0) {
                         let nearestIndex = -1;
                         let minDistanceSq = Infinity;
+
                         for (let j = 0; j < unvisited.length; j++) {
                             const dSq = distSq(currentPoint, unvisited[j]);
                             if (dSq < minDistanceSq) {
