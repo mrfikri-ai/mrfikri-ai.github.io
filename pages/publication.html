@@ -1,52 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog - Muhamad Rausyan Fikri</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .blog-post {
-            margin-bottom: 2rem;
-        }
-        .blog-post-title {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-        .blog-post-meta {
-            color: #6c757d;
-            font-size: 0.875rem;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Publications | Muhamad Rausyan Fikri</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css" integrity="sha512-lBhX+..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">Muhamad Rausyan Fikri</a>
-      <div class="collapse navbar-collapse">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="../index.html">M.R. Fikri</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMenu">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="pages/research.html">Research</a></li>
-          <li class="nav-item"><a class="nav-link" href="pages/publication.html">Publications</a></li>
-          <li class="nav-item"><a class="nav-link" href="pages/pro_grant.html">Projects and Grants</a></li>
-          <li class="nav-item"><a class="nav-link" href="pages/blog.html">Blog</a></li>
-          <!-- <li class="nav-item"><a class="nav-link" href="pages/jupyter/ch_1.html">Jupyter</a></li>-->
+          <li class="nav-item"><a class="nav-link" href="../index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link active" href="publication.html">Publications</a></li>
+          <li class="nav-item"><a class="nav-link" href="pro_grant.html">Projects & Grants</a></li>
         </ul>
       </div>
     </div>
   </nav>
 
-<section class="container mt-5">
-  <h1 class="text-center mb-4">Blog</h1>
+  <header class="bg-light py-5 text-center">
+    <div class="container">
+      <h1 class="display-4">Publications</h1>
+      <p class="lead">Books, Conferences, and Journals</p>
+    </div>
+  </header>
 
-  <article class="blog-post">
-    <h2 class="blog-post-title">Blog Post Title 1</h2>
-    <p class="blog-post-meta">August 16, 2024 by <a href="#">Author Name</a></p>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum. Integer vehicula est a metus facilisis, in varius libero tincidunt.</p>
-    <a class="btn btn-primary" href="#">Read More</a>
-  </article>
+  <main class="container py-5">
+    <!-- Books / Book Chapters -->
+    <section id="books" class="mb-5">
+      <h2 class="mb-3"><i class="fas fa-book-open text-primary"></i> Books / Book Chapters</h2>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+          <strong>[B1]</strong> M.R.Fikri, M. Athafarras, A.N. Rabbani, <em>Pemrograman Dasar Arduino dan MATLAB SIMULINK</em>, 2022, ISBN: 9786230239687
+        </li>
+      </ul>
+    </section>
 
+    <!-- Refereed Conferences -->
+    <section id="conferences" class="mb-5">
+      <h2 class="mb-3"><i class="fas fa-chalkboard-teacher text-success"></i> Refereed Conference Proceedings</h2>
+      <ul class="list-group">
+        <li class="list-group-item"><strong>[C23]</strong> P. Kosonen, Y. Fadaeian, R.M. Eura, J. Sulameri, M.R. Fikri, A. Gusrialdi, 2025, <em>Human-Drone Swarm Interaction System for Persistent Monitoring of Large Disperse Area</em>, IEEE CASE 2025 (Accepted)</li>
+        <li class="list-group-item"><strong>[C22]</strong> M.R. Fikri, E. Silvennoinen, M.W.S. Atman, Y. Nikulin, A. Gusrialdi, <em>Persistent Monitoring of Large Dispersed Areas using Drone Swarms: Algorithms and Experimental Validation</em>, Findrone 2024 (Second Round)</li>
+        <li class="list-group-item"><strong>[C21]</strong> M.R. Fikri, M.W.S. Atman, Y. Nikulin, A. Gusrialdi, <em>Efficient Multi-Robot Task Allocation with Nonsmooth Objective Functions for Persistent Monitoring in Large Dispersed Areas</em> [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C20]</strong> M.F.N. Maghfiroh, A.A.N.P. Redi, S.A. Sugiarto, S.G. Garnett, M.R. Fikri, 2023, <em>Review on Drones Integration in the Disaster Relief Operation</em>, ICCMSO 2023 [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C19]</strong> D.W. Djamari, A. Gusrialdi, M.R. Fikri, Y. Susilowati, 2023, <em>Multi-Agent Formation Control under Switching Network and Input Constraints</em>, IFAC World Congress 2023 [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C18]</strong> M.R. Ramadhani, M.R. Fikri, K. Saptaji, 2023, <em>Design and Experimental Validation of Robotic Manipulator for Indoor Farming</em>, ICST UGM 2022 [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C17]</strong> A.D. Cahyo, N. Maulidati, F. Triawan, M.R. Fikri, D.W. Djamari, R. Andreas, E.F. Sutanto, 2023, <em>Plastic Bottle Recycler with Automation using Raspberry Pi Controller</em>, AASEC 2021 [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C16]</strong> A. Simarmata, T.K. Dewi, M.R. Fikri, K. Saptaji, 2023, <em>Development of Autonomous Robot Using Fuzzy Inference System (FIS) for Indoor Ultraviolet (UV) Disinfection</em>, AASEC 2021 (Best Presenter) [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C15]</strong> G.H. Sitompul, M.R. Fikri, I.B.S. Hadisujoto, I. Setiawan, 2022, <em>Autonomous Mobile Robot Localization using Markov Decision Algorithm</em>, AASEC 2021 [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C14]</strong> D.W. Djamari, M.R. Fikri, 2022, <em>Multi-Agent Formation Control using Internal Model Principle</em>, ICEVT 2022 [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C13]</strong> M.R. Fikri, N. Alqindi, D.W. Djamari, A. Natayu, 2022, <em>A Micro Quadrotor Gas Source Localization Benchmark in a Low-Computational Controller</em>, ISITIA 2022 [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C12]</strong> N. Alqindi, M.R. Fikri, D.W. Djamari, 2022, <em>Odor Source Localization in Low Computational Controller Micro Quadrotor</em>, ISRITI-AKAKOM 2021 [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C11]</strong> M.D. Renaldi, M.R. Fikri, D.W. Djamari, 2022, <em>Mini UAV Orientation Control based on Face Tracking Algorithm</em>, ICCED 2021 [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C10]</strong> M.R. Fikri, D.W. Djamari, S.M. Levy, 2021, <em>H-infinity Controller Design of Two-Wheeled Mobile Robot Under Disturbance</em>, ISITIA 2021, Surabaya [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C9]</strong> F.N. Azmi, K. Saptaji, M.R. Fikri, 2021, <em>Construction of Vibration Monitoring System Based on Wireless Sensor Network (WSN) for Machining Process</em> [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C8]</strong> N. Maulidati, A.D.N. Cahyo, D.W. Djamari, M.R. Fikri, F. Triawan, 2021, <em>Development of Sorting System for Plastic Bottle Waste Management</em>, AASEC 2020 [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C7]</strong> M.R. Fikri, M.F. Ramdhany, D.W. Djamari, 2021, <em>Investigation of Male Searching for Female Silkworm using an Artificial Pheromone in Free-Space Environment</em>, AASEC 2020, Bandung [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C6]</strong> D.W. Djamari, M.R. Fikri, 2021, <em>Multi-Agent Formation based on Self-loop Laplacian</em>, AASEC 2020 [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C5]</strong> D.W. Djamari, M.R. Fikri, 2020, <em>Scalable Formation Control of Double Integrator Agents: A Distributed Observer Approach</em>, SICE 2020 [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C4]</strong> D.W. Djamari, M.R. Fikri, 2020, <em>Distributed Observer Approach for Scalable Formation Control of Multi-Agent Network</em>, ISITIA 2020 [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C3]</strong> D.W. Djamari, M.R. Fikri, M. Athafarras, N. Maulidati, S.M. Levy, A.D.N. Cahyo, M.A. Octaviani, M.F. Ramdhany, F. Triawan, 2020, <em>Multi-Agent Formation with Size Scaling via Self-Position Feedback</em>, ICST 2020, pp.1-6 [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C2]</strong> H.M. Putra, M.R. Fikri, D.P. Riananda, et al., 2020, <em>Propulsion Selection Method Using Motor Thrust Table for Optimum Flight in Multirotor Aircraft</em>, ISAST 2019 [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[C1]</strong> M.R. Fikri, A. Ashari, A. Dharmawan, B. Alldino, 2018, <em>An overview of fundamental step using wi-fi communication for flight formation quadrotors</em>, ICST 2018, pp.1-5 [<a href="#" target="_blank">Link</a>]</li>
+      </ul>
+    </section>
 
+    <!-- Journals -->
+    <section id="journals">
+      <h2 class="mb-3"><i class="fas fa-journal-whills text-danger"></i> Journals</h2>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item"><strong>[J12]</strong> T.K. Dewi, K. Saptaji, A. Simarmata, M.R. Fikri, 2023, <em>Implementation of Convolutional Neural Network (CNN) Algorithm for Autonomous Robot</em>, Journal of Mechanical Engineering, 21(2), 217-237, 2024 [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[J11]</strong> M.W.S. Atman, M. R. Fikri, K. Priandana, A. Gusrialdi, 2024, <em>A Two-Layer Control Framework for Persistent Monitoring of a Large Area With a Robotic Sensor Network</em>, IEEE Access, 12, 4153-4165, DOI:10.1109/ACCESS.2023.3349319 [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[J10]</strong> M.F.N. Maghfiroh, A.A.N.P. Redi, J. Ong, M.R. Fikri, 2023, <em>Cuckoo Search Algorithm for Construction Site Layout Planning</em>, IAES IJ-AI [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[J9]</strong> M. R. Fikri, K. Saptaji, F. N. Azmi, 2022, <em>Wireless Vibration Monitoring System for Milling Process and Analysis of the Influence of Processing Parameters</em>, JICTRA [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[J8]</strong> M.R. Fikri, D.W. Djamari, 2022, <em>Palm-Sized Quadrotor Source Localization Using Modified Bio-Inspired Algorithm in Obstacle Region</em>, IJECE [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[J7]</strong> D.W. Djamari, M.R. Fikri, B. Budiman, F. Triawan, 2022, <em>Formation Control of Non-Identical Multi-Agent Systems</em>, IJECE [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[J6]</strong> M. Athafarras, D.W. Djamari, M.R. Fikri, B.A. Budiman, F. Triawan, I. Veza, 2022, <em>Development of Impact Attenuator Analysis Tools in Crash Scenario using Euler Method and Finite Element Analysis</em>, Journal of Engineering and Applied Science [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[J5]</strong> A. Natayu, F. Triawan, I.B.G.G. Dananjaya, R.R. Reflin, M.R. Fikri, 2021, <em>Understanding the Climate Behavior Through Data Interpretation: Java-Bali-Nusa Tenggara Case</em>, IJoCED [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[J4]</strong> M.R. Fikri, D.W. Djamari, 2020, <em>Full-State Feedback Control Design for Shape Formation Using Linear Quadratic Regulator</em>, IJoCED [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[J3]</strong> M.R. Fikri, 2020, <em>Gas Source Localization using Bio-inspired Algorithm for Mini Flying Sniffer Robot: Development and Experimental Investigation</em>, ComEngApp Journal [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[J2]</strong> S. Shigaki, M.R. Fikri, D. Kurabayashi, 2018, <em>Design and Experimental Evaluation of an Odor Sensing Method for a Pocket-Sized Quadcopter</em>, Sensors, 18, 3720 [<a href="#" target="_blank">Link</a>]</li>
+        <li class="list-group-item"><strong>[J1]</strong> S. Shigaki, M.R. Fikri, C. Hernandez Reyes, T. Sakurai, N. Ando, D. Kurabayashi, R. Kanzaki, H. Sezutsu, 2018, <em>Animal-in-the-loop system to investigate adaptive behavior</em>, Advanced Robotics, 32(17), 945-953 [<a href="#" target="_blank">Link</a>]</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="bg-dark text-white text-center py-3">
+    &copy; <span id="year"></span> M.R. Fikri. All rights reserved.
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
