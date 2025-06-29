@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quadcopter Control SPA</title>
+    <!-- Chosen Palette: Warm Neutral (Tailwind Stone, Amber, Sky) -->
+    <!-- Application Structure Plan: A three-panel dashboard layout is used to create a logical and intuitive user flow. The structure is [SYSTEM & TELEMETRY] -> [VISUAL FEEDBACK] -> [FLIGHT CONTROLS]. This guides the user from left-to-right: first, understanding the drone's status and performing high-level actions (like connecting or arming); second, observing the drone's orientation in the central 3D view; and third, performing the fine-grained flight maneuvers with the joysticks. The right-hand panel is now fully dynamic: it shows joysticks for manual control, is hidden during autonomous flight, and displays a detailed performance report with three convergence subplots after a goal is reached. This provides a clear "command -> execute -> analyze" workflow. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Drone Attitude & Position -> Goal: Provide immediate, intuitive spatial feedback. -> Viz/Method: Real-time 3D model of a quadcopter with 3D axis helpers for local and global frames, flying over a simple grid. -> Interaction: Model's pitch, roll, yaw, and altitude update based on joystick input; user can orbit/pan/zoom the camera. -> Justification: A 3D view is superior to numeric readouts for understanding spatial orientation and provides a "simulator-like" experience. -> Library/Method: three.js (Canvas).
+        - Report Info: Drone Position History -> Goal: Visualize trajectory over time. -> Viz/Method: Three real-time line charts plotting X, Y, and Z position. -> Interaction: Charts update automatically, showing a moving window of the last 10 seconds. -> Justification: Plots provide a much clearer sense of movement trends and oscillations than instantaneous numeric values. -> Library/Method: Chart.js (Canvas).
+        - Report Info: Post-Flight Convergence Analysis -> Goal: Analyze the controller's performance on each axis. -> Viz/Method: Three separate line charts (subplots) for X, Y, and Z axes, which are generated *after* the goal is reached. -> Interaction: Each plot shows the drone's path against a dashed line representing the target for that axis. -> Justification: This provides a much more powerful and clear analysis of the controller's convergence, overshoot, and settling time than a real-time plot. -> Library/Method: Chart.js (Canvas).
+        - Report Info: System Status & Camera View -> Goal: Clearly inform user of drone state and provide different viewpoints. -> Viz/Method: Labeled text readouts, color-coded buttons, and a new camera toggle control. A new command panel shows goal coordinates. -> Interaction: User clicks buttons for high-level commands and to switch between perspective and top-down camera views. -> Justification: Provides at-a-glance info and enhances visual analysis of the drone's flight path. -> Library/Method: Vanilla JS, HTML, Tailwind CSS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <style>
+        .toggle-checkbox:checked + .toggle-label { background-color: #0284c7; }
+        .toggle-checkbox:checked + .toggle-label .toggle-ball { transform: translateX(1.25rem); }
+        .chart-container { position: relative; width: 100%; height: 80px; }
+        .btn-view.active { background-color: #0284c7; color: white; }
+    </style>
+</head>
+<body class="bg-stone-100 font-['Inter',_sans-serif] flex items-center justify-center min-h-screen p-2 sm:p-4">
+
+    <div class="w-full max-w-7xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-4 sm:p-6 border border-stone-200">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl sm:text-4xl font-['Orbitron',_sans-serif] text-stone-800">Quadcopter Control Interface</h1>
+            <div class="flex items-center justify-center mt-2 text-sm text-stone-600">
+                <div id="connection-status-dot" class="w-3 h-3 rounded-full mr-2 transition-colors"></div>
+                <span id="connection-status-text"></span>
+            </div>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <div class="lg:col-span-3 bg-stone-50 p-4 rounded-lg border border-stone-200 flex flex-col">
+                <div>
+                    <h2 class="text-lg font-bold text-stone-700 mb-2">System Control</h2>
+                    <p class="text-sm text-stone-600 mb-4">Manage drone state, monitor telemetry, and switch between flight modes and camera views.</p>
+                </div>
+                
+                <div class="bg-white p-3 rounded-lg border border-stone-200 mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-stone-700">Autonomous Mode</h3>
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" name="toggle" id="autonomous-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" disabled/>
+                            <label for="autonomous-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-stone-300 cursor-pointer"></label>
+                            <div class="toggle-ball absolute left-0 top-0 w-6 h-6 rounded-full bg-white shadow transform transition-transform duration-200 ease-in"></div>
+                        </div>
+                    </div>
+                     <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-stone-700">Camera View</h3>
+                        <div class="flex rounded-md shadow-sm" role="group">
+                          <button type="button" id="btn-view-persp" class="btn-view active px-3 py-1 text-sm font-medium text-stone-900 bg-white border border-stone-200 rounded-l-lg hover:bg-stone-100">3D</button>
+                          <button type="button" id="btn-view-top" class="btn-view px-3 py-1 text-sm font-medium text-stone-900 bg-white border-t border-b border-r border-stone-200 rounded-r-md hover:bg-stone-100">Top</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3 mb-4">
+                    <div class="chart-container"><canvas id="plot-x"></canvas></div>
+                    <div class="chart-container"><canvas id="plot-y"></canvas></div>
+                    <div class="chart-container"><canvas id="plot-z"></canvas></div>
+                </div>
+                
+                <p id="telemetry-status" class="text-lg font-bold text-center bg-white p-2 rounded-lg mb-4 border border-stone-200 mt-auto"></p>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="btn-connect" class="font-semibold py-2 rounded-md transition-all shadow-sm hover:shadow-md active:scale-95"></button>
+                    <button id="btn-arm" class="font-semibold py-2 rounded-md transition-all shadow-sm hover:shadow-md active:scale-95" disabled></button>
+                    <button id="btn-takeoff" class="font-semibold py-2 rounded-md transition-all shadow-sm hover:shadow-md active:scale-95 bg-sky-600 hover:bg-sky-500 text-white" disabled>Take Off</button>
+                    <button id="btn-land" class="font-semibold py-2 rounded-md transition-all shadow-sm hover:shadow-md active:scale-95 bg-violet-600 hover:bg-violet-500 text-white" disabled>Land</button>
+                </div>
+                <button id="btn-emergency" class="font-semibold w-full py-3 mt-3 rounded-md transition-all shadow-sm hover:shadow-md active:scale-95 bg-red-600 hover:bg-red-500 text-white" disabled>EMERGENCY STOP</button>
+            </div>
+
+            <div class="lg:col-span-6 flex flex-col">
+                <div class="mb-4">
+                    <h2 class="text-lg font-bold text-stone-700 mb-2">3D Visualizer</h2>
+                    <p class="text-sm text-stone-600">Use your mouse scroll wheel to zoom. In Autonomous Mode, click the grid to set a destination. In Manual Mode, orbit the camera by clicking and dragging.</p>
+                </div>
+                <div id="visualization-container" class="relative w-full h-[400px] md:h-auto md:flex-1 rounded-lg border border-stone-300 cursor-pointer bg-gradient-to-br from-sky-100 to-stone-200"></div>
+                <div id="command-panel" class="hidden mt-2 p-3 bg-stone-50 border border-stone-200 rounded-lg text-center">
+                    <p class="text-sm font-semibold text-stone-700">Autonomous Target: <span id="goal-coordinates" class="font-mono text-sky-600">No Target Set</span></p>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3 bg-stone-50 p-4 rounded-lg border border-stone-200">
+                <div id="joystick-panel">
+                    <div class="mb-4">
+                        <h2 class="text-lg font-bold text-stone-700 mb-2">Manual Flight Controls</h2>
+                        <p class="text-sm text-stone-600 mb-4">Use these virtual joysticks to fly the drone. Altitude (throttle) control remains active in both modes.</p>
+                    </div>
+                    <div id="joystick-container" class="h-full flex flex-col items-center justify-around gap-6 transition-all">
+                        <div class="flex flex-col items-center w-full">
+                            <h3 class="font-semibold text-stone-700 mb-2">Throttle / Yaw</h3>
+                            <div id="joystick-left" class="w-40 h-40 bg-white rounded-full relative border-2 border-stone-200 flex justify-center items-center"><div id="joystick-handle-left" class="w-16 h-16 bg-sky-500 rounded-full absolute cursor-grab shadow-lg"></div></div>
+                        </div>
+                        <div class="flex flex-col items-center w-full">
+                            <h3 class="font-semibold text-stone-700 mb-2">Pitch / Roll</h3>
+                            <div id="joystick-right" class="w-40 h-40 bg-white rounded-full relative border-2 border-stone-200 flex justify-center items-center"><div id="joystick-handle-right" class="w-16 h-16 bg-sky-500 rounded-full absolute cursor-grab shadow-lg"></div></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="report-panel" class="hidden h-full flex flex-col">
+                    <div class="mb-4">
+                        <h2 class="text-lg font-bold text-stone-700 mb-2">Performance Report</h2>
+                        <p class="text-sm text-stone-600 mb-4">Analysis of the last autonomous flight, showing convergence to the target on each axis.</p>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="chart-container"><canvas id="report-x"></canvas></div>
+                        <div class="chart-container"><canvas id="report-y"></canvas></div>
+                        <div class="chart-container"><canvas id="report-z"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let isConnected = false, isArmed = false, isAutonomous = false;
+        let controlState = { throttle: 0, yaw: 0, pitch: 0, roll: 0 };
+        const clock = new THREE.Clock();
+        
+        const ui = {
+            statusDot: document.getElementById('connection-status-dot'), statusText: document.getElementById('connection-status-text'),
+            buttons: { connect: document.getElementById('btn-connect'), arm: document.getElementById('btn-arm'), takeoff: document.getElementById('btn-takeoff'), land: document.getElementById('btn-land'), emergency: document.getElementById('btn-emergency'), viewPersp: document.getElementById('btn-view-persp'), viewTop: document.getElementById('btn-view-top'),},
+            telemetry: { status: document.getElementById('telemetry-status'), },
+            visContainer: document.getElementById('visualization-container'),
+            joystickPanel: document.getElementById('joystick-panel'), 
+            reportPanel: document.getElementById('report-panel'),
+            commandPanel: document.getElementById('command-panel'),
+            goalCoordinates: document.getElementById('goal-coordinates'),
+            autonomousToggle: document.getElementById('autonomous-toggle')
+        };
+        
+        let scene, camera, renderer, quadcopter, propellers = [], gridHelper, goalMarker, raycaster;
+        let targetPitch = 0, targetRoll = 0, targetYaw = 0, targetAltitude = 0, currentYaw = 0;
+        let goalPosition = null;
+        let positionCharts = {};
+        let reportCharts = {};
+        let flightPathHistory = [];
+        let autonomousState = 'IDLE'; // IDLE, TAKING_OFF, MOVING_TO_GOAL, REACHED, HOVERING
+        const takeoffAltitude = 5;
+
+        function createLineChart(canvasId, label, color) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            return new Chart(ctx, {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: label, data: [], borderColor: color, borderWidth: 2, fill: false, pointRadius: 0, tension: 0.1 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { beginAtZero: false, ticks: { font: { size: 10 } } } }, plugins: { legend: { display: true, labels: { font: { size: 12 } } } } }
+            });
+        }
+        
+        function createReportChart(canvasId, label) {
+             const ctx = document.getElementById(canvasId).getContext('2d');
+             return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { label: 'Drone Path', data: [], borderColor: 'rgba(59, 130, 246, 0.8)', borderWidth: 2, pointRadius: 1, tension: 0.1 },
+                        { label: 'Target', data: [], borderColor: 'rgba(249, 115, 22, 1)', borderWidth: 2, pointRadius: 0, borderDash: [5, 5], fill: false }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { title: { display: true, text: label } } }, plugins: { legend: { display: true } } }
+             });
+        }
+
+        function initCharts() {
+            positionCharts.x = createLineChart('plot-x', 'Live X', 'rgba(239, 68, 68, 0.8)');
+            positionCharts.y = createLineChart('plot-y', 'Live Y (Altitude)', 'rgba(34, 197, 94, 0.8)');
+            positionCharts.z = createLineChart('plot-z', 'Live Z', 'rgba(59, 130, 246, 0.8)');
+            reportCharts.x = createReportChart('report-x', 'X-Axis');
+            reportCharts.y = createReportChart('report-y', 'Y-Axis (Altitude)');
+            reportCharts.z = createReportChart('report-z', 'Z-Axis');
+        }
+
+        function init3D() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, ui.visContainer.clientWidth / ui.visContainer.clientHeight, 0.1, 1000);
+            camera.position.set(0, 4, 6);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(ui.visContainer.clientWidth, ui.visContainer.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            ui.visContainer.appendChild(renderer.domElement);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(5, 10, 7.5);
+            scene.add(dirLight);
+            gridHelper = new THREE.GridHelper(50, 50, 0xcccccc, 0xdddddd);
+            scene.add(gridHelper);
+            raycaster = new THREE.Raycaster();
+            
+            const axesHelper = new THREE.AxesHelper(1); scene.add(axesHelper);
+            goalMarker = new THREE.Mesh( new THREE.CylinderGeometry(0.2, 0.2, 0.1, 16), new THREE.MeshStandardMaterial({ color: 0xfb923c, emissive: 0xfb923c, emissiveIntensity: 0.5 }) );
+            goalMarker.visible = false;
+            scene.add(goalMarker);
+
+            quadcopter = new THREE.Group();
+            const localAxesHelper = new THREE.AxesHelper(0.5); quadcopter.add(localAxesHelper);
+            const scale = 0.5;
+            quadcopter.add(new THREE.Mesh(new THREE.BoxGeometry(0.7 * scale, 0.05 * scale, 0.7 * scale), new THREE.MeshStandardMaterial({ color: 0x166534, metalness: 0.4, roughness: 0.8 })));
+            const armMat = new THREE.MeshStandardMaterial({ color: 0x4b5563 });
+            const armGeo = new THREE.BoxGeometry(0.15 * scale, 0.1 * scale, 2.0 * scale);
+            const arm1 = new THREE.Mesh(armGeo, armMat); arm1.rotation.y = Math.PI / 4;
+            const arm2 = new THREE.Mesh(armGeo, armMat); arm2.rotation.y = -Math.PI / 4;
+            quadcopter.add(arm1, arm2);
+            
+            const motorDist = 0.7 * scale;
+            const motorPositions = [ { x: motorDist, z: motorDist, c: 0x0ea5e9 }, { x: -motorDist, z: motorDist, c: 0x0ea5e9 }, { x: motorDist, z: -motorDist, c: 0xa8a29e }, { x: -motorDist, z: -motorDist, c: 0xa8a29e } ];
+            motorPositions.forEach(p => {
+                const propGroup = new THREE.Group(); propGroup.position.set(p.x, 0.1 * scale, p.z);
+                const bladeMat = new THREE.MeshStandardMaterial({ color: p.c, metalness: 0.6, roughness: 0.5 });
+                const bladeGeo = new THREE.BoxGeometry(0.5 * scale, 0.02 * scale, 0.1 * scale);
+                const bladeModel = new THREE.Group();
+                const b1 = new THREE.Mesh(bladeGeo, bladeMat); b1.position.x = 0.25 * scale;
+                const b2 = new THREE.Mesh(bladeGeo, bladeMat); b2.position.x = -0.25 * scale;
+                bladeModel.add(b1, b2);
+                const blurGeo = new THREE.CircleGeometry(0.3 * scale, 16);
+                const blurMat = new THREE.MeshBasicMaterial({ color: p.c, transparent: true, opacity: 0.4 });
+                const blurDisc = new THREE.Mesh(blurGeo, blurMat); blurDisc.rotation.x = -Math.PI / 2; blurDisc.visible = false;
+                propGroup.add(bladeModel, blurDisc);
+                propellers.push({ blades: bladeModel, blur: blurDisc });
+                quadcopter.add(propGroup);
+            });
+            scene.add(quadcopter);
+            camera.lookAt(quadcopter.position);
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+            if (isAutonomous) runAutonomousController();
+            else runManualController();
+            updatePhysics(delta);
+            updateVisuals();
+        }
+
+        function updatePhysics(delta) {
+            quadcopter.rotation.x += (targetPitch - quadcopter.rotation.x) * 0.1;
+            quadcopter.rotation.z += (targetRoll - quadcopter.rotation.z) * 0.1;
+            currentYaw += targetYaw * delta; 
+            quadcopter.rotation.y = currentYaw;
+            quadcopter.position.y += (targetAltitude - quadcopter.position.y) * 0.05;
+
+            if (isArmed && ui.telemetry.status.textContent === 'Flying') {
+                const maxSpeed = 3.0;
+                const forwardMove = -Math.sin(quadcopter.rotation.x) * maxSpeed * delta;
+                const sideMove = Math.sin(quadcopter.rotation.z) * maxSpeed * delta;
+                quadcopter.position.x -= sideMove * Math.cos(currentYaw) + forwardMove * Math.sin(currentYaw);
+                quadcopter.position.z += sideMove * Math.sin(currentYaw) - forwardMove * Math.cos(currentYaw);
+            }
+        }
+        
+        function updateVisuals() {
+            const spinSpeed = isArmed ? (controlState.throttle * 40 + 5) : 0;
+            const showBlur = isArmed && controlState.throttle > 0.15;
+            propellers.forEach((p, i) => { p.blades.rotation.y += (i % 2 === 0 ? 1 : -1) * spinSpeed; p.blades.visible = !showBlur; p.blur.visible = showBlur; });
+
+            const maxDataPoints = 50; 
+            const now = clock.elapsedTime.toFixed(1);
+            ['x', 'y', 'z'].forEach(axis => {
+                const chart = positionCharts[axis];
+                chart.data.labels.push(now);
+                chart.data.datasets[0].data.push(quadcopter.position[axis]);
+                if (chart.data.labels.length > maxDataPoints) { chart.data.labels.shift(); chart.data.datasets[0].data.shift(); }
+                chart.update('none');
+            });
+            renderer.render(scene, camera);
+        }
+        
+        function runManualController() {
+            targetPitch = -controlState.pitch * Math.PI / 4;
+            targetRoll = -controlState.roll * Math.PI / 4;
+            targetYaw = -controlState.yaw * 2;
+            targetAltitude = controlState.throttle * 5;
+        }
+        
+        function runAutonomousController() {
+            targetYaw = 0;
+            
+            if (ui.telemetry.status.textContent === 'Flying') {
+                 targetAltitude = takeoffAltitude;
+            }
+            
+            switch(autonomousState) {
+                case 'IDLE':
+                    targetPitch = 0; targetRoll = 0;
+                    break;
+                case 'TAKING_OFF':
+                    targetPitch = 0; targetRoll = 0;
+                    if (Math.abs(quadcopter.position.y - takeoffAltitude) < 0.2) {
+                         setTimeout(() => {
+                           if (goalPosition && autonomousState === 'HOVERING') autonomousState = 'MOVING_TO_GOAL';
+                        }, 2000); 
+                        autonomousState = 'HOVERING'; 
+                    }
+                    break;
+                case 'HOVERING':
+                    targetPitch = 0; targetRoll = 0;
+                    break;
+                case 'MOVING_TO_GOAL':
+                    if (goalPosition) {
+                        flightPathHistory.push({ t: clock.elapsedTime, x: quadcopter.position.x, y: quadcopter.position.y, z: quadcopter.position.z, goal: goalPosition });
+                        const error = new THREE.Vector3().subVectors(goalPosition, quadcopter.position);
+                        error.y = 0; 
+                        if (error.length() > 0.5) {
+                            const proportionalGain = 1.5;
+                            const localError = error.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), -currentYaw);
+                            targetPitch = THREE.MathUtils.clamp(localError.z * proportionalGain, -1, 1) * Math.PI / 6;
+                            targetRoll = THREE.MathUtils.clamp(-localError.x * proportionalGain, -1, 1) * Math.PI / 6;
+                        } else {
+                           autonomousState = 'REACHED';
+                        }
+                    }
+                    break;
+                case 'REACHED':
+                    targetPitch = 0; targetRoll = 0;
+                    generatePerformanceReport();
+                    goalPosition = null; 
+                    goalMarker.visible = false;
+                    ui.goalCoordinates.textContent = "Goal Reached!";
+                    autonomousState = 'IDLE';
+                    break;
+            }
+        }
+
+        function generatePerformanceReport() {
+            if (!flightPathHistory || flightPathHistory.length === 0) return;
+            const finalGoal = flightPathHistory[flightPathHistory.length - 1].goal;
+            if (!finalGoal) return;
+
+            ui.reportPanel.classList.remove('hidden');
+            const pathX = flightPathHistory.map(p => p.x);
+            const pathY = flightPathHistory.map(p => p.y);
+            const pathZ = flightPathHistory.map(p => p.z);
+            const labels = flightPathHistory.map(p => p.t.toFixed(2));
+            
+            reportCharts.x.data.labels = labels;
+            reportCharts.x.data.datasets[0].data = pathX;
+            reportCharts.x.data.datasets[1].data = [{x: labels[0], y: finalGoal.x}, {x: labels[labels.length-1], y: finalGoal.x}];
+            reportCharts.x.update();
+            
+            reportCharts.y.data.labels = labels;
+            reportCharts.y.data.datasets[0].data = pathY;
+            reportCharts.y.data.datasets[1].data = [{x: labels[0], y: takeoffAltitude}, {x: labels[labels.length-1], y: takeoffAltitude}];
+            reportCharts.y.update();
+
+            reportCharts.z.data.labels = labels;
+            reportCharts.z.data.datasets[0].data = pathZ;
+            reportCharts.z.data.datasets[1].data = [{x: labels[0], y: finalGoal.z}, {x: labels[labels.length-1], y: finalGoal.z}];
+            reportCharts.z.update();
+        }
+
+        let isMouseDragging = false, prevMouseX = 0;
+        function onMouseDown(event) { if (isAutonomous) setGoalPosition(event); else { isMouseDragging = true; prevMouseX = event.clientX; } }
+        function onMouseUp() { isMouseDragging = false; }
+        function onMouseMove(event) {
+            if (!isMouseDragging || isAutonomous) return;
+            const deltaX = event.clientX - prevMouseX;
+            camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), deltaX * -0.005);
+            camera.lookAt(quadcopter.position);
+            prevMouseX = event.clientX;
+        }
+        function onWheel(event) { event.preventDefault(); camera.position.z += event.deltaY * 0.01; }
+        
+        function setGoalPosition(event) {
+            flightPathHistory = []; 
+            ui.reportPanel.classList.add('hidden');
+            
+            const rect = renderer.domElement.getBoundingClientRect();
+            const mouse = new THREE.Vector2( ((event.clientX - rect.left) / rect.width) * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1 );
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObject(gridHelper);
+            if (intersects.length > 0) {
+                goalPosition = intersects[0].point;
+                goalMarker.position.copy(goalPosition);
+                goalMarker.position.y = 0.05;
+                goalMarker.visible = true;
+                ui.goalCoordinates.textContent = `X: ${goalPosition.x.toFixed(2)}, Z: ${goalPosition.z.toFixed(2)}`;
+
+                if (isArmed && ui.telemetry.status.textContent !== 'Flying') {
+                    sendCommand('takeoff');
+                } else if (isArmed) {
+                    autonomousState = 'MOVING_TO_GOAL';
+                }
+            }
+        }
+        
+        function setCameraView(view) {
+            if (view === 'top') {
+                camera.position.set(quadcopter.position.x, 25, quadcopter.position.z);
+                camera.lookAt(quadcopter.position);
+                ui.buttons.viewTop.classList.add('active'); ui.buttons.viewPersp.classList.remove('active');
+            } else { 
+                camera.position.set(0, 4, 6);
+                camera.lookAt(new THREE.Vector3(0,0,0));
+                ui.buttons.viewPersp.classList.add('active'); ui.buttons.viewTop.classList.remove('active');
+            }
+        }
+
+        window.addEventListener('resize', () => { camera.aspect = ui.visContainer.clientWidth / ui.visContainer.clientHeight; camera.updateProjectionMatrix(); renderer.setSize(ui.visContainer.clientWidth, ui.visContainer.clientHeight); });
+        function setConnectionStatus(connected) {
+            isConnected = connected;
+            ui.statusDot.classList.toggle('bg-red-500', !connected); ui.statusDot.classList.toggle('bg-green-500', connected);
+            ui.statusText.textContent = connected ? 'Connected' : 'Disconnected';
+            ui.buttons.connect.textContent = connected ? 'Disconnect' : 'Connect';
+            ui.buttons.connect.classList.toggle('bg-stone-200', connected); ui.buttons.connect.classList.toggle('text-stone-800', connected);
+            ui.buttons.connect.classList.toggle('bg-blue-600', !connected); ui.buttons.connect.classList.toggle('text-white', !connected);
+            
+            ui.buttons.arm.disabled = !connected;
+            ui.buttons.emergency.disabled = !connected;
+            ui.autonomousToggle.disabled = true;
+
+            if (!connected) {
+                 isArmed = false; 
+                 sendCommand('land'); 
+                 updateArmButton(); 
+            }
+        }
+        function sendCommand(command) {
+            if (!isConnected && command !== 'land') return;
+            switch(command) {
+                case 'arm': isArmed = true; ui.telemetry.status.textContent = 'Armed'; break;
+                case 'disarm': isArmed = false; ui.telemetry.status.textContent = 'Disarmed'; break;
+                case 'takeoff': 
+                    if (isArmed) {
+                         ui.telemetry.status.textContent = 'Flying'; 
+                         if(isAutonomous) {
+                            autonomousState = 'TAKING_OFF';
+                            flightPathHistory = [];
+                            ui.reportPanel.classList.add('hidden');
+                         }
+                    }
+                    break;
+                case 'land': ui.telemetry.status.textContent = 'Landed'; targetAltitude = 0; quadcopter.position.set(0,0,0); currentYaw=0; isArmed = false; autonomousState = 'IDLE'; break;
+                case 'emergency': ui.telemetry.status.textContent = 'EMERGENCY'; targetAltitude = 0; isArmed = false; autonomousState = 'IDLE'; break;
+            }
+            updateArmButton();
+        }
+        function updateArmButton() {
+            ui.buttons.arm.textContent = isArmed ? 'Disarm' : 'Arm';
+            ui.buttons.arm.classList.toggle('bg-amber-500', !isArmed); ui.buttons.arm.classList.toggle('hover:bg-amber-400', !isArmed);
+            ui.buttons.arm.classList.toggle('bg-red-500', isArmed); ui.buttons.arm.classList.toggle('hover:bg-red-400', isArmed);
+            [ui.buttons.arm, ui.buttons.takeoff, ui.buttons.land].forEach(el => el.classList.toggle('text-white', true));
+            ui.buttons.takeoff.disabled = !isArmed;
+            ui.buttons.land.disabled = !isArmed;
+            ui.autonomousToggle.disabled = !isArmed;
+
+            if (!isArmed && isAutonomous) {
+                ui.autonomousToggle.checked = false;
+                toggleAutonomousMode(false);
+            }
+        }
+        function toggleAutonomousMode(isAuto) {
+            isAutonomous = isAuto;
+            ui.joystickPanel.classList.toggle('hidden', isAuto);
+            ui.commandPanel.classList.toggle('hidden', !isAuto);
+            ui.reportPanel.classList.add('hidden');
+            ui.visContainer.style.cursor = isAuto ? 'crosshair' : 'move';
+            if (!isAuto) { 
+                goalMarker.visible = false; goalPosition = null; autonomousState = 'IDLE';
+                ui.goalCoordinates.textContent = 'No Target Set';
+            }
+        }
+        function setupJoystick(joystickId, handleId, isLeftStick) {
+            const joystick = document.getElementById(joystickId); const handle = document.getElementById(handleId);
+            let isDragging = false;
+            const onDrag = (e) => {
+                if (!isDragging) return; e.preventDefault();
+                const baseRect = joystick.getBoundingClientRect(); const radius = joystick.clientWidth / 2;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX; const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                let dx = clientX - (baseRect.left + radius); let dy = clientY - (baseRect.top + radius);
+                const dist = Math.sqrt(dx * dx + dy * dy); const maxDist = radius;
+                if (dist > maxDist) { dx *= maxDist / dist; dy *= maxDist / dist; }
+                handle.style.transform = `translate(${dx}px, ${dy}px)`;
+                if (isLeftStick) { controlState.throttle = (-dy / maxDist + 1) / 2; controlState.yaw = dx / maxDist; } 
+                else { controlState.pitch = -dy / maxDist; controlState.roll = dx / maxDist; }
+            };
+            const onStart = (e) => { isDragging = true; handle.style.transition = 'none'; };
+            const onEnd = () => {
+                if (!isDragging) return; isDragging = false; handle.style.transition = 'transform 0.2s ease-out';
+                const radius = joystick.clientWidth / 2;
+                if (isLeftStick) { handle.style.transform = `translate(0px, ${-(controlState.throttle * 2 - 1) * radius}px)`; controlState.yaw = 0; } 
+                else { handle.style.transform = `translate(0px, 0px)`; controlState.pitch = 0; controlState.roll = 0; }
+            };
+            handle.addEventListener('mousedown', onStart); document.addEventListener('mousemove', onDrag); document.addEventListener('mouseup', onEnd);
+            handle.addEventListener('touchstart', onStart, { passive: true }); document.addEventListener('touchmove', onDrag, { passive: false }); document.addEventListener('touchend', onEnd);
+        }
+
+        initCharts();
+        init3D();
+        setConnectionStatus(false);
+        sendCommand('land');
+        setupJoystick('joystick-left', 'joystick-handle-left', true);
+        setupJoystick('joystick-right', 'joystick-handle-right', false);
+        ui.buttons.connect.addEventListener('click', () => isConnected ? setConnectionStatus(false) : setConnectionStatus(true));
+        ui.buttons.arm.addEventListener('click', () => sendCommand(isArmed ? 'disarm' : 'arm'));
+        ui.buttons.takeoff.addEventListener('click', () => sendCommand('takeoff'));
+        ui.buttons.land.addEventListener('click', () => sendCommand('land'));
+        ui.buttons.emergency.addEventListener('click', () => sendCommand('emergency'));
+        ui.autonomousToggle.addEventListener('change', (e) => toggleAutonomousMode(e.target.checked));
+        ui.visContainer.addEventListener('mousedown', onMouseDown);
+        ui.visContainer.addEventListener('mousemove', onMouseMove);
+        ui.visContainer.addEventListener('mouseup', onMouseUp);
+        ui.visContainer.addEventListener('mouseleave', onMouseUp);
+        ui.visContainer.addEventListener('wheel', onWheel, { passive: false });
+        ui.buttons.viewPersp.addEventListener('click', () => setCameraView('perspective'));
+        ui.buttons.viewTop.addEventListener('click', () => setCameraView('top'));
+    });
+    </script>
+</body>
+</html>
