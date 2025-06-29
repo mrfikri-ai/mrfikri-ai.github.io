@@ -284,11 +284,11 @@
         
         function runAutonomousController() {
             targetYaw = 0;
-            
-            if (ui.telemetry.status.textContent === 'Flying') {
-                 targetAltitude = takeoffAltitude;
+            // Only climb to takeoff altitude during takeoff phase
+            if (autonomousState === 'TAKING_OFF') {
+                targetAltitude = takeoffAltitude;
             }
-            
+
             switch(autonomousState) {
                 case 'IDLE':
                     targetPitch = 0; targetRoll = 0;
@@ -307,23 +307,28 @@
                     break;
                 case 'MOVING_TO_GOAL':
                     if (goalPosition) {
-                        flightPathHistory.push({ t: clock.elapsedTime, x: quadcopter.position.x, y: quadcopter.position.y, z: quadcopter.position.z, goal: goalPosition });
+                        // horizontal error only
                         const error = new THREE.Vector3().subVectors(goalPosition, quadcopter.position);
-                        error.y = 0; 
+                        error.y = 0;
                         if (error.length() > 0.5) {
                             const proportionalGain = 1.5;
                             const localError = error.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), -currentYaw);
                             targetPitch = THREE.MathUtils.clamp(localError.z * proportionalGain, -1, 1) * Math.PI / 6;
                             targetRoll = THREE.MathUtils.clamp(-localError.x * proportionalGain, -1, 1) * Math.PI / 6;
+                            // maintain altitude
+                            targetAltitude = takeoffAltitude;
                         } else {
-                           autonomousState = 'REACHED';
+                            autonomousState = 'REACHED';
                         }
                     }
                     break;
                 case 'REACHED':
                     targetPitch = 0; targetRoll = 0;
+                    // descend and land after reaching goal
+                    targetAltitude = 0;
+                    sendCommand('land');
                     generatePerformanceReport();
-                    goalPosition = null; 
+                    goalPosition = null;
                     goalMarker.visible = false;
                     ui.goalCoordinates.textContent = "Goal Reached!";
                     autonomousState = 'IDLE';
