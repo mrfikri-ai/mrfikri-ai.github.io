@@ -295,6 +295,11 @@
         }
         
         function runManualController() {
+            // Prevent manual control before arming
+            if (!isArmed) {
+                targetPitch = 0; targetRoll = 0; targetYaw = 0; targetAltitude = 0;
+                return;
+            }
             targetPitch = -controlState.pitch * Math.PI / 4;
             targetRoll = -controlState.roll * Math.PI / 4;
             targetYaw = -controlState.yaw * 2;
