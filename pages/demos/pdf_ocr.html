@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PDF OCR Converter – Make PDF Searchable (Client-Side)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tesseract.js v5 (WASM) -->
+  <script src="https://unpkg.com/tesseract.js@5.0.2/dist/tesseract.min.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .drop-active { border-color:#0284c7; background:#f0f9ff; }
+    .progress-striped {
+      background-image: linear-gradient(45deg,rgba(255,255,255,.25) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.25) 50%,rgba(255,255,255,.25) 75%,transparent 75%,transparent);
+      background-size: 1rem 1rem;
+      animation: move 1s linear infinite;
+    }
+    @keyframes move { from { background-position:0 0; } to { background-position:1rem 0; } }
+  </style>
+</head>
+<body class="bg-stone-100 min-h-screen flex flex-col">
+  <!-- Navbar (reuse site style) -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <div class="container mx-auto px-4">
+      <a class="navbar-brand text-white font-semibold" href="/">Muhamad Rausyan Fikri</a>
+      <div class="ms-auto flex gap-4 text-sm">
+        <a class="text-white/80 hover:text-white" href="/">Home</a>
+        <a class="text-white/80 hover:text-white" href="../research.html">Research</a>
+        <a class="text-white/80 hover:text-white" href="../publication.html">Publications</a>
+        <a class="text-white/80 hover:text-white" href="../pro_grant.html">Projects & Grants</a>
+        <a class="text-white/80 hover:text-white" href="../blog.html">Blog</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="flex-1 container mx-auto max-w-4xl px-4 py-8">
+    <h1 class="text-3xl font-bold text-stone-800 mb-2">PDF OCR Converter</h1>
+    <p class="text-stone-600 mb-6">Convert a non-searchable (scanned) PDF into a searchable (text-layer) PDF entirely in your browser. <span class="font-semibold">No files are uploaded to any server</span>; processing is temporary and stays on your device. After you download the output, the in-memory data is cleared.</p>
+
+    <section class="bg-white/90 backdrop-blur rounded-xl shadow border border-stone-200 p-6">
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Upload / Actions -->
+        <div>
+          <h2 class="text-lg font-semibold text-stone-700 mb-3">1. Upload PDF</h2>
+          <div id="dropzone" class="relative border-2 border-dashed border-stone-300 rounded-lg p-6 text-center transition-colors cursor-pointer">
+            <input id="file-input" type="file" accept="application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+            <p class="text-stone-600"><span class="font-medium">Click</span> or <span class="font-medium">drag & drop</span> a PDF here.</p>
+            <p id="file-info" class="mt-2 text-xs text-stone-400"></p>
+          </div>
+
+          <div class="mt-6 space-y-3">
+            <button id="btn-convert" disabled class="w-full py-2.5 rounded-md font-semibold bg-sky-600 disabled:opacity-40 disabled:cursor-not-allowed text-white shadow hover:bg-sky-500 transition">2. Convert to Searchable PDF</button>
+            <button id="btn-download" disabled class="w-full py-2.5 rounded-md font-semibold bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-white shadow hover:bg-emerald-500 transition">3. Download Result</button>
+            <button id="btn-reset" class="w-full py-2.5 rounded-md font-medium bg-stone-200 text-stone-700 hover:bg-stone-300 transition">Reset</button>
+          </div>
+        </div>
+
+        <!-- Progress & Log -->
+        <div>
+          <h2 class="text-lg font-semibold text-stone-700 mb-3">Progress</h2>
+          <div class="mb-4">
+            <div class="h-4 w-full bg-stone-200 rounded overflow-hidden">
+              <div id="progress-bar" class="h-full w-0 bg-sky-600 progress-striped"></div>
+            </div>
+            <p id="progress-text" class="mt-2 text-sm text-stone-600">Idle</p>
+          </div>
+          <div class="bg-stone-50 border border-stone-200 rounded-lg p-3 h-56 overflow-auto text-xs font-mono" id="log"></div>
+          <p class="mt-4 text-xs text-stone-500">Limitations: Large multi-page PDFs may take a while (OCR runs page-by-page). Keep this tab active to ensure smooth progress.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-10 text-sm text-stone-600 leading-relaxed">
+      <h2 class="text-lg font-semibold text-stone-700 mb-2">How it works</h2>
+      <ul class="list-disc ms-6 space-y-1">
+        <li>Your PDF is processed locally using WebAssembly (Tesseract.js). No server upload.</li>
+        <li>An OCR text layer is embedded so you can select, copy, and search text in the resulting PDF.</li>
+        <li>After downloading, all in-memory references & object URLs are cleared. Refresh or click Reset to purge state sooner.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="py-6 text-center text-xs text-stone-500">Client-side OCR Demo • Tesseract.js • No data leaves your browser.</footer>
+
+<script>
+(function(){
+  const fileInput = document.getElementById('file-input');
+  const dropzone = document.getElementById('dropzone');
+  const fileInfo = document.getElementById('file-info');
+  const btnConvert = document.getElementById('btn-convert');
+  const btnDownload = document.getElementById('btn-download');
+  const btnReset = document.getElementById('btn-reset');
+  const progressBar = document.getElementById('progress-bar');
+  const progressText = document.getElementById('progress-text');
+  const logEl = document.getElementById('log');
+
+  let selectedFile = null;
+  let worker = null;
+  let pdfArrayBuffer = null; // OCR output
+  let objectUrl = null;
+
+  function log(msg){
+    const time = new Date().toISOString().split('T')[1].replace('Z','');
+    logEl.textContent += `[${time}] ${msg}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  function setProgress(pct, status){
+    progressBar.style.width = pct + '%';
+    progressText.textContent = status + (pct?` (${pct.toFixed(1)}%)`: '');
+  }
+  function resetState(){
+    selectedFile = null; pdfArrayBuffer = null; setProgress(0,'Idle');
+    fileInfo.textContent = ''; btnConvert.disabled = true; btnDownload.disabled = true;
+    if (objectUrl){ URL.revokeObjectURL(objectUrl); objectUrl=null; }
+    if (worker){ try { worker.terminate(); } catch(e){} worker=null; }
+    logEl.textContent = '';
+  }
+
+  // Drag & drop
+  ['dragenter','dragover'].forEach(evt=>dropzone.addEventListener(evt, e=>{e.preventDefault(); e.stopPropagation(); dropzone.classList.add('drop-active');}));
+  ['dragleave','drop'].forEach(evt=>dropzone.addEventListener(evt, e=>{e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('drop-active');}));
+  dropzone.addEventListener('drop', e=>{ const f = e.dataTransfer.files[0]; if(f) handleFile(f); });
+  fileInput.addEventListener('change', e=>{ const f = e.target.files[0]; if(f) handleFile(f); });
+
+  function handleFile(f){
+    if(f.type !== 'application/pdf'){ log('Rejected: not a PDF.'); return; }
+    selectedFile = f; fileInfo.textContent = `${f.name} (${(f.size/1024/1024).toFixed(2)} MB)`; log(`Loaded file: ${f.name}`);
+    btnConvert.disabled = false; btnDownload.disabled = true; pdfArrayBuffer=null; if(objectUrl){ URL.revokeObjectURL(objectUrl); objectUrl=null; }
+  }
+
+  async function ensureWorker(){
+    if(worker) return worker;
+    log('Initializing OCR engine (this happens once)...');
+    setProgress(2,'Initializing');
+    worker = await Tesseract.createWorker('eng', 1, { logger: m => {
+      if(m.status === 'recognizing text'){
+        const pct = m.progress * 100; setProgress( pct * 0.9 + 10, 'OCR');
+      } else if(m.status){ progressText.textContent = m.status; }
+    }});
+    await worker.setParameters({ tessedit_create_pdf: '1' });
+    return worker;
+  }
+
+  btnConvert.addEventListener('click', async ()=>{
+    if(!selectedFile) return; btnConvert.disabled = true; btnDownload.disabled = true; pdfArrayBuffer=null;
+    log('Starting OCR... This may take a while for large PDFs. Keep the tab active.');
+    setProgress(5,'Loading');
+    try {
+      const w = await ensureWorker();
+      const start = performance.now();
+      const { data } = await w.recognize(selectedFile); // data.text etc.
+      log(`Recognized text length: ${data.text.length}`);
+      setProgress(95,'Finalizing PDF');
+      const pdf = await w.getPDF('ocr_result');
+      pdfArrayBuffer = pdf.data; // ArrayBuffer
+      setProgress(100,'Done');
+      log('OCR complete. Ready to download.');
+      btnDownload.disabled = false;
+      const secs = ((performance.now()-start)/1000).toFixed(1);
+      log(`Total time: ${secs}s`);
+    } catch(err){
+      console.error(err); log('Error: '+ err.message); setProgress(0,'Failed'); btnConvert.disabled = false;
+    }
+  });
+
+  btnDownload.addEventListener('click', ()=>{
+    if(!pdfArrayBuffer){ return; }
+    if(objectUrl){ URL.revokeObjectURL(objectUrl); objectUrl=null; }
+    const blob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
+    objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = objectUrl; a.download = (selectedFile?.name?.replace(/\.pdf$/i,'') || 'ocr_result') + '_searchable.pdf';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    log('Download triggered. Clearing in-memory data...');
+    // Clear sensitive data after slight delay to allow download
+    setTimeout(()=>{ pdfArrayBuffer=null; if(objectUrl){ URL.revokeObjectURL(objectUrl); objectUrl=null; } btnDownload.disabled = true; log('In-memory PDF cleared.'); }, 1500);
+  });
+
+  btnReset.addEventListener('click', resetState);
+  window.addEventListener('beforeunload', resetState);
+})();
+</script>
+</body>
+</html>
