@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>PDF OCR Converter – Make PDF Searchable (Client-Side)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <    log('Starting OCR (multi-page supported). Keep tab active. (Init may already be done in background.)');cript src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Tesseract.js (WASM) with cache-busting -->
   <script src="https://unpkg.com/tesseract.js@5.0.2/dist/tesseract.min.js?v=2"></script>
@@ -119,6 +119,7 @@
   let lastProgressPhase = '';
   let pdfPassword = null;
   let encryptedDetected = false;
+  let initPromise = null; // For background init
 
   function log(msg){
     const time = new Date().toLocaleTimeString('en-US',{hour12:false});
@@ -155,29 +156,34 @@
 
   async function initWorker(){
     if(worker) return worker;
-    log('Initializing OCR engine (one-time)...');
-    setProgress(2,'Init OCR');
-    try {
-      worker = await Tesseract.createWorker({
-        // Explicit paths mitigate some CSP / CDN resolution issues.
-        workerPath: 'https://unpkg.com/tesseract.js@5.0.2/dist/worker.min.js',
-        corePath:   'https://unpkg.com/tesseract.js-core@5.0.0/tesseract-core.wasm.js',
-        langPath:   'https://tessdata.projectnaptha.com/5.0.0_fast',
-        logger: m => {
-          if(m.status && lastProgressPhase !== m.status){ lastProgressPhase = m.status; log('STATUS: '+m.status); }
-        }
-      });
-      await worker.loadLanguage('eng');
-      await worker.initialize('eng');
-      await worker.setParameters({ tessedit_create_pdf: '1' });
-      log('OCR engine ready.');
-      return worker;
-    } catch(e){
-      console.error('Worker init error', e);
-      log('Init error: ' + (e?.message || JSON.stringify(e) || 'Unknown')); 
-      log('Troubleshooting: 1) Hard refresh (Ctrl+F5) to bypass cache. 2) Check network console for blocked CDN requests. 3) Corporate/firewall may block unpkg or tessdata CDN.');
-      throw e;
-    }
+    if(initPromise) return initPromise; // Already initializing
+    initPromise = (async () => {
+      log('Initializing OCR engine in background...');
+      setProgress(1,'Init OCR');
+      try {
+        worker = await Tesseract.createWorker({
+          // Explicit paths mitigate some CSP / CDN resolution issues.
+          workerPath: 'https://unpkg.com/tesseract.js@5.0.2/dist/worker.min.js',
+          corePath:   'https://unpkg.com/tesseract.js-core@5.0.0/tesseract-core.wasm.js',
+          langPath:   'https://tessdata.projectnaptha.com/5.0.0_fast',
+          logger: m => {
+            if(m.status && lastProgressPhase !== m.status){ lastProgressPhase = m.status; log('STATUS: '+m.status); }
+          }
+        });
+        await worker.loadLanguage('eng');
+        await worker.initialize('eng');
+        await worker.setParameters({ tessedit_create_pdf: '1' });
+        log('OCR engine ready.');
+        setProgress(0,'Idle'); // Reset progress after init
+        return worker;
+      } catch(e){
+        console.error('Worker init error', e);
+        log('Init error: ' + (e?.message || JSON.stringify(e) || 'Unknown')); 
+        log('Troubleshooting: 1) Hard refresh (Ctrl+F5) to bypass cache. 2) Check network console for blocked CDN requests. 3) Corporate/firewall may block unpkg or tessdata CDN.');
+        throw e;
+      }
+    })();
+    return initPromise;
   }
 
   async function renderPdfPages(file, password){
@@ -264,6 +270,10 @@
   });
 
   btnReset.addEventListener('click', resetState);
+  // Start background init on page load
+  window.addEventListener('load', () => {
+    initWorker().catch(() => {}); // Non-blocking
+  });
   window.addEventListener('beforeunload', resetState);
 })();
 </script>
