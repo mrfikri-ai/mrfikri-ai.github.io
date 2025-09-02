@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>PDF OCR Converter – Make PDF Searchable (Client-Side)</title>
-  <    log('Starting OCR (multi-page supported). Keep tab active. (Init may already be done in background.)');cript src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Tesseract.js (WASM) with cache-busting -->
   <script src="https://unpkg.com/tesseract.js@5.0.2/dist/tesseract.min.js?v=2"></script>
@@ -68,6 +68,9 @@
             <button id="btn-convert" disabled class="w-full py-2.5 rounded-md font-semibold bg-sky-600 disabled:opacity-40 disabled:cursor-not-allowed text-white shadow hover:bg-sky-500 transition">2. Convert to Searchable PDF</button>
             <button id="btn-download" disabled class="w-full py-2.5 rounded-md font-semibold bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-white shadow hover:bg-emerald-500 transition">3. Download Result</button>
             <button id="btn-reset" class="w-full py-2.5 rounded-md font-medium bg-stone-200 text-stone-700 hover:bg-stone-300 transition">Reset</button>
+            <div class="pt-2 border-t border-stone-200 text-xs text-stone-500 leading-snug">
+              Optimized for speed. <label class="inline-flex items-center gap-1 cursor-pointer ms-1"><input id="toggle-quality" type="checkbox" class="accent-sky-600" /> <span>High Quality (slower)</span></label>
+            </div>
           </div>
         </div>
 
@@ -119,7 +122,7 @@
   let lastProgressPhase = '';
   let pdfPassword = null;
   let encryptedDetected = false;
-  let initPromise = null; // For background init
+  let highQuality = false; // unchecked = faster
 
   function log(msg){
     const time = new Date().toLocaleTimeString('en-US',{hour12:false});
@@ -156,37 +159,32 @@
 
   async function initWorker(){
     if(worker) return worker;
-    if(initPromise) return initPromise; // Already initializing
-    initPromise = (async () => {
-      log('Initializing OCR engine in background...');
-      setProgress(1,'Init OCR');
-      try {
-        worker = await Tesseract.createWorker({
-          // Explicit paths mitigate some CSP / CDN resolution issues.
-          workerPath: 'https://unpkg.com/tesseract.js@5.0.2/dist/worker.min.js',
-          corePath:   'https://unpkg.com/tesseract.js-core@5.0.0/tesseract-core.wasm.js',
-          langPath:   'https://tessdata.projectnaptha.com/5.0.0_fast',
-          logger: m => {
-            if(m.status && lastProgressPhase !== m.status){ lastProgressPhase = m.status; log('STATUS: '+m.status); }
-          }
-        });
-        await worker.loadLanguage('eng');
-        await worker.initialize('eng');
-        await worker.setParameters({ tessedit_create_pdf: '1' });
-        log('OCR engine ready.');
-        setProgress(0,'Idle'); // Reset progress after init
-        return worker;
-      } catch(e){
-        console.error('Worker init error', e);
-        log('Init error: ' + (e?.message || JSON.stringify(e) || 'Unknown')); 
-        log('Troubleshooting: 1) Hard refresh (Ctrl+F5) to bypass cache. 2) Check network console for blocked CDN requests. 3) Corporate/firewall may block unpkg or tessdata CDN.');
-        throw e;
-      }
-    })();
-    return initPromise;
+    log('Init OCR engine...');
+    setProgress(2,'Init');
+    try {
+      worker = await Tesseract.createWorker({
+        // Explicit paths mitigate some CSP / CDN resolution issues.
+        workerPath: 'https://unpkg.com/tesseract.js@5.0.2/dist/worker.min.js',
+        corePath:   'https://unpkg.com/tesseract.js-core@5.0.0/tesseract-core.wasm.js',
+        langPath:   'https://tessdata.projectnaptha.com/5.0.0_fast',
+        logger: m => {
+          if(m.status && lastProgressPhase !== m.status){ lastProgressPhase = m.status; log('STATUS: '+m.status); }
+        }
+      });
+      await worker.loadLanguage('eng');
+      await worker.initialize('eng');
+      await worker.setParameters({ tessedit_create_pdf: '1' });
+      log('OCR engine ready.');
+      return worker;
+    } catch(e){
+      console.error('Worker init error', e);
+      log('Init error: ' + (e?.message || JSON.stringify(e) || 'Unknown')); 
+      log('Troubleshooting: 1) Hard refresh (Ctrl+F5) to bypass cache. 2) Check network console for blocked CDN requests. 3) Corporate/firewall may block unpkg or tessdata CDN.');
+      throw e;
+    }
   }
 
-  async function renderPdfPages(file, password){
+  async function streamPdfAndOcr(file, password, ocrWorker){
     if(!window.pdfjsLib){ throw new Error('pdf.js not loaded'); }
     const arrayBuf = await file.arrayBuffer();
     let pdf;
@@ -199,39 +197,41 @@
       }
       throw e;
     }
-    log(`PDF has ${pdf.numPages} page(s).`);
-    const canvases = [];
+    log(`Pages: ${pdf.numPages}`);
+    const scaleBase = highQuality ? 2.4 : 1.4; // lower scale => faster
     for(let pageNum=1; pageNum<=pdf.numPages; pageNum++){
       const page = await pdf.getPage(pageNum);
-      const viewport = page.getViewport({ scale: 2 }); // 2x for better OCR accuracy
-      const canvas = document.createElement('canvas');
-      canvas.width = viewport.width; canvas.height = viewport.height;
-      const ctx = canvas.getContext('2d');
+      const viewport = page.getViewport({ scale: scaleBase });
+      // Use OffscreenCanvas if available for slightly better perf
+      let canvas, ctx;
+      if(typeof OffscreenCanvas !== 'undefined'){
+        canvas = new OffscreenCanvas(viewport.width, viewport.height);
+        ctx = canvas.getContext('2d');
+      } else {
+        canvas = document.createElement('canvas');
+        canvas.width = viewport.width; canvas.height = viewport.height;
+        ctx = canvas.getContext('2d');
+      }
+      const startRender = performance.now();
       await page.render({ canvasContext: ctx, viewport }).promise;
-      canvases.push(canvas);
-      log(`Rendered page ${pageNum}/${pdf.numPages}`);
+      const renderMs = (performance.now()-startRender).toFixed(0);
+      setProgress(((pageNum-1)/pdf.numPages)*85 + 5, `OCR Page ${pageNum}/${pdf.numPages}`);
+      const bmp = (canvas instanceof OffscreenCanvas) ? canvas.transferToImageBitmap() : canvas; // pass directly
+      const startOcr = performance.now();
+      const { data } = await ocrWorker.recognize(bmp);
+      log(`P${pageNum}: ${(performance.now()-startOcr).toFixed(1)}s OCR, ${renderMs}ms render, chars ${data.text.length}`);
     }
-    return canvases;
   }
 
   btnConvert.addEventListener('click', async ()=>{
     if(!selectedFile) return;
     btnConvert.disabled = true; btnDownload.disabled = true; pdfArrayBuffer=null; setProgress(0,'Preparing');
-  log('Starting OCR (multi-page supported). Keep tab active. If it stalls at init, try Ctrl+F5.');
+    log(`Starting OCR (${highQuality ? 'HIGH QUALITY' : 'FAST'}). Keep tab active.`);
     const startAll = performance.now();
     try {
       const w = await initWorker();
-      const canvases = await renderPdfPages(selectedFile, pdfPassword);
-      const total = canvases.length;
-      for(let i=0;i<canvases.length;i++){
-        const pageStart = performance.now();
-        setProgress( (i/total)*80 + 10, `OCR Page ${i+1}/${total}`);
-        const { data } = await w.recognize(canvases[i]);
-        log(`Page ${i+1} text length: ${data.text.length}`);
-        const pageSecs = ((performance.now()-pageStart)/1000).toFixed(1);
-        log(`Page ${i+1} done in ${pageSecs}s`);
-      }
-      setProgress(92,'Assembling PDF');
+      await streamPdfAndOcr(selectedFile, pdfPassword, w);
+      setProgress(92,'Build PDF');
       const pdf = await w.getPDF('ocr_result');
       pdfArrayBuffer = pdf.data;
       setProgress(100,'Done');
@@ -256,6 +256,20 @@
   const passwordInput = document.getElementById('pdf-password');
   passwordInput.addEventListener('input', e => { pdfPassword = e.target.value || null; });
 
+  // Quality toggle
+  document.getElementById('toggle-quality').addEventListener('change', e => { highQuality = e.target.checked; log('Mode: ' + (highQuality ? 'High Quality' : 'Fast')); });
+
+  // Preload worker during idle time after minimal user interaction to shorten perceived wait.
+  let preloadScheduled = false;
+  function schedulePreload(){
+    if(preloadScheduled || worker) return; preloadScheduled = true;
+    const kickoff = ()=>initWorker().then(()=>log('OCR engine preloaded.')).catch(()=>{});
+    if('requestIdleCallback' in window){ requestIdleCallback(kickoff,{timeout:3500}); } else { setTimeout(kickoff, 2500); }
+  }
+  ['mousemove','scroll','keydown','touchstart'].forEach(evt => window.addEventListener(evt, schedulePreload, { once:true, passive:true }));
+  // Also attempt after load in case no interaction
+  window.addEventListener('load', ()=> setTimeout(schedulePreload, 1500));
+
   btnDownload.addEventListener('click', ()=>{
     if(!pdfArrayBuffer) return;
     if(objectUrl){ URL.revokeObjectURL(objectUrl); objectUrl=null; }
@@ -270,10 +284,6 @@
   });
 
   btnReset.addEventListener('click', resetState);
-  // Start background init on page load
-  window.addEventListener('load', () => {
-    initWorker().catch(() => {}); // Non-blocking
-  });
   window.addEventListener('beforeunload', resetState);
 })();
 </script>
