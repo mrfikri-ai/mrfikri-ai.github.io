@@ -6,8 +6,16 @@
   <title>PDF OCR Converter – Make PDF Searchable (Client-Side)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Tesseract.js v5 (WASM) -->
+  <!-- Tesseract.js (WASM) -->
   <script src="https://unpkg.com/tesseract.js@5.0.2/dist/tesseract.min.js"></script>
+  <!-- pdf.js for rendering PDF pages to canvases before OCR -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js" integrity="sha512-eJqggrdM1vJrqVYgOL9gir1PAlb08otA6DphMstewdAkSK+QGdIKF3Gtg9Ojd0NbXwV3kDLEZHnpKNTM3t85ow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    // Configure pdf.js worker
+    if (window['pdfjsLib']) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
+    }
+  </script>
   <style>
     body { font-family: 'Inter', sans-serif; }
     .drop-active { border-color:#0284c7; background:#f0f9ff; }
@@ -85,6 +93,7 @@
 
 <script>
 (function(){
+  // Elements
   const fileInput = document.getElementById('file-input');
   const dropzone = document.getElementById('dropzone');
   const fileInfo = document.getElementById('file-info');
@@ -95,31 +104,33 @@
   const progressText = document.getElementById('progress-text');
   const logEl = document.getElementById('log');
 
+  // State
   let selectedFile = null;
   let worker = null;
-  let pdfArrayBuffer = null; // OCR output
+  let pdfArrayBuffer = null; // OCR output buffer
   let objectUrl = null;
+  let lastProgressPhase = '';
 
   function log(msg){
-    const time = new Date().toISOString().split('T')[1].replace('Z','');
+    const time = new Date().toLocaleTimeString('en-US',{hour12:false});
     logEl.textContent += `[${time}] ${msg}\n`;
     logEl.scrollTop = logEl.scrollHeight;
   }
-  function setProgress(pct, status){
+  function setProgress(pct, label){
     progressBar.style.width = pct + '%';
-    progressText.textContent = status + (pct?` (${pct.toFixed(1)}%)`: '');
+    progressText.textContent = label + (pct ? ` (${pct.toFixed(1)}%)` : '');
   }
   function resetState(){
     selectedFile = null; pdfArrayBuffer = null; setProgress(0,'Idle');
     fileInfo.textContent = ''; btnConvert.disabled = true; btnDownload.disabled = true;
-    if (objectUrl){ URL.revokeObjectURL(objectUrl); objectUrl=null; }
-    if (worker){ try { worker.terminate(); } catch(e){} worker=null; }
-    logEl.textContent = '';
+    if(objectUrl){ URL.revokeObjectURL(objectUrl); objectUrl=null; }
+    if(worker){ /* keep worker cached for speed */ }
+    logEl.textContent='';
   }
 
-  // Drag & drop
-  ['dragenter','dragover'].forEach(evt=>dropzone.addEventListener(evt, e=>{e.preventDefault(); e.stopPropagation(); dropzone.classList.add('drop-active');}));
-  ['dragleave','drop'].forEach(evt=>dropzone.addEventListener(evt, e=>{e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('drop-active');}));
+  // Drag & Drop UI
+  ['dragenter','dragover'].forEach(evt=>dropzone.addEventListener(evt,e=>{e.preventDefault();e.stopPropagation();dropzone.classList.add('drop-active');}));
+  ['dragleave','drop'].forEach(evt=>dropzone.addEventListener(evt,e=>{e.preventDefault();e.stopPropagation();dropzone.classList.remove('drop-active');}));
   dropzone.addEventListener('drop', e=>{ const f = e.dataTransfer.files[0]; if(f) handleFile(f); });
   fileInput.addEventListener('change', e=>{ const f = e.target.files[0]; if(f) handleFile(f); });
 
@@ -129,51 +140,90 @@
     btnConvert.disabled = false; btnDownload.disabled = true; pdfArrayBuffer=null; if(objectUrl){ URL.revokeObjectURL(objectUrl); objectUrl=null; }
   }
 
-  async function ensureWorker(){
+  async function initWorker(){
     if(worker) return worker;
-    log('Initializing OCR engine (this happens once)...');
-    setProgress(2,'Initializing');
-    worker = await Tesseract.createWorker('eng', 1, { logger: m => {
-      if(m.status === 'recognizing text'){
-        const pct = m.progress * 100; setProgress( pct * 0.9 + 10, 'OCR');
-      } else if(m.status){ progressText.textContent = m.status; }
-    }});
-    await worker.setParameters({ tessedit_create_pdf: '1' });
-    return worker;
+    log('Initializing OCR engine (one-time)...');
+    setProgress(2,'Init OCR');
+    try {
+      worker = await Tesseract.createWorker({ logger: m => {
+        if(m.status && lastProgressPhase !== m.status){ lastProgressPhase = m.status; log('STATUS: '+m.status); }
+        if(m.status === 'recognizing text') {
+          // m.progress between 0 and 1 for current page
+          // Page level progress handled separately; keep here for granularity
+        }
+      }});
+      await worker.loadLanguage('eng');
+      await worker.initialize('eng');
+      await worker.setParameters({ tessedit_create_pdf: '1' });
+      return worker;
+    } catch(e){
+      log('Failed to initialize OCR engine. Check your network (needs to download traineddata).');
+      throw e;
+    }
+  }
+
+  async function renderPdfPages(file){
+    if(!window.pdfjsLib){ throw new Error('pdf.js not loaded'); }
+    const url = URL.createObjectURL(file);
+    const loadingTask = pdfjsLib.getDocument({ url });
+    const pdf = await loadingTask.promise;
+    log(`PDF has ${pdf.numPages} page(s).`);
+    const canvases = [];
+    for(let pageNum=1; pageNum<=pdf.numPages; pageNum++){
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 2 }); // 2x for better OCR accuracy
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width; canvas.height = viewport.height;
+      const ctx = canvas.getContext('2d');
+      await page.render({ canvasContext: ctx, viewport }).promise;
+      canvases.push(canvas);
+      log(`Rendered page ${pageNum}/${pdf.numPages}`);
+    }
+    URL.revokeObjectURL(url);
+    return canvases;
   }
 
   btnConvert.addEventListener('click', async ()=>{
-    if(!selectedFile) return; btnConvert.disabled = true; btnDownload.disabled = true; pdfArrayBuffer=null;
-    log('Starting OCR... This may take a while for large PDFs. Keep the tab active.');
-    setProgress(5,'Loading');
+    if(!selectedFile) return;
+    btnConvert.disabled = true; btnDownload.disabled = true; pdfArrayBuffer=null; setProgress(0,'Preparing');
+    log('Starting OCR (multi-page supported). Keep tab active.');
+    const startAll = performance.now();
     try {
-      const w = await ensureWorker();
-      const start = performance.now();
-      const { data } = await w.recognize(selectedFile); // data.text etc.
-      log(`Recognized text length: ${data.text.length}`);
-      setProgress(95,'Finalizing PDF');
+      const w = await initWorker();
+      const canvases = await renderPdfPages(selectedFile);
+      const total = canvases.length;
+      for(let i=0;i<canvases.length;i++){
+        const pageStart = performance.now();
+        setProgress( (i/total)*80 + 10, `OCR Page ${i+1}/${total}`);
+        const { data } = await w.recognize(canvases[i]);
+        log(`Page ${i+1} text length: ${data.text.length}`);
+        const pageSecs = ((performance.now()-pageStart)/1000).toFixed(1);
+        log(`Page ${i+1} done in ${pageSecs}s`);
+      }
+      setProgress(92,'Assembling PDF');
       const pdf = await w.getPDF('ocr_result');
-      pdfArrayBuffer = pdf.data; // ArrayBuffer
+      pdfArrayBuffer = pdf.data;
       setProgress(100,'Done');
       log('OCR complete. Ready to download.');
       btnDownload.disabled = false;
-      const secs = ((performance.now()-start)/1000).toFixed(1);
-      log(`Total time: ${secs}s`);
+      const totalSecs = ((performance.now()-startAll)/1000).toFixed(1);
+      log(`Total time: ${totalSecs}s`);
     } catch(err){
-      console.error(err); log('Error: '+ err.message); setProgress(0,'Failed'); btnConvert.disabled = false;
+      console.error(err); log('Error: '+ (err.message||err)); setProgress(0,'Failed'); btnConvert.disabled = false;
     }
   });
 
   btnDownload.addEventListener('click', ()=>{
-    if(!pdfArrayBuffer){ return; }
+    if(!pdfArrayBuffer) return;
     if(objectUrl){ URL.revokeObjectURL(objectUrl); objectUrl=null; }
     const blob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
     objectUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = objectUrl; a.download = (selectedFile?.name?.replace(/\.pdf$/i,'') || 'ocr_result') + '_searchable.pdf';
+    const a = document.createElement('a');
+    a.href = objectUrl;
+    a.download = (selectedFile?.name?.replace(/\.pdf$/i,'') || 'ocr_result') + '_searchable.pdf';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     log('Download triggered. Clearing in-memory data...');
-    // Clear sensitive data after slight delay to allow download
-    setTimeout(()=>{ pdfArrayBuffer=null; if(objectUrl){ URL.revokeObjectURL(objectUrl); objectUrl=null; } btnDownload.disabled = true; log('In-memory PDF cleared.'); }, 1500);
+    setTimeout(()=>{ pdfArrayBuffer=null; if(objectUrl){ URL.revokeObjectURL(objectUrl); objectUrl=null; } btnDownload.disabled=true; log('In-memory PDF cleared.'); }, 1500);
   });
 
   btnReset.addEventListener('click', resetState);
