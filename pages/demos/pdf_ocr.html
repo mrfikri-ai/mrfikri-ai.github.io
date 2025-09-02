@@ -6,10 +6,10 @@
   <title>PDF OCR Converter – Make PDF Searchable (Client-Side)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Tesseract.js (WASM) -->
-  <script src="https://unpkg.com/tesseract.js@5.0.2/dist/tesseract.min.js"></script>
+  <!-- Tesseract.js (WASM) with cache-busting -->
+  <script src="https://unpkg.com/tesseract.js@5.0.2/dist/tesseract.min.js?v=2"></script>
   <!-- pdf.js for rendering PDF pages to canvases before OCR -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js" integrity="sha512-eJqggrdM1vJrqVYgOL9gir1PAlb08otA6DphMstewdAkSK+QGdIKF3Gtg9Ojd0NbXwV3kDLEZHnpKNTM3t85ow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js?v=2" integrity="sha512-eJqggrdM1vJrqVYgOL9gir1PAlb08otA6DphMstewdAkSK+QGdIKF3Gtg9Ojd0NbXwV3kDLEZHnpKNTM3t85ow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script>
     // Configure pdf.js worker
     if (window['pdfjsLib']) {
@@ -55,6 +55,13 @@
             <input id="file-input" type="file" accept="application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
             <p class="text-stone-600"><span class="font-medium">Click</span> or <span class="font-medium">drag & drop</span> a PDF here.</p>
             <p id="file-info" class="mt-2 text-xs text-stone-400"></p>
+          </div>
+
+          <!-- Password Prompt (shown only if PDF is encrypted) -->
+          <div id="password-wrapper" class="mt-4 hidden">
+            <label for="pdf-password" class="block text-sm font-medium text-stone-700 mb-1">PDF Password Required</label>
+            <input id="pdf-password" type="password" placeholder="Enter password" class="w-full rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500" />
+            <p class="text-xs text-amber-600 mt-2" id="password-hint">This PDF is encrypted. Enter the password and click Convert again.</p>
           </div>
 
           <div class="mt-6 space-y-3">
@@ -110,6 +117,8 @@
   let pdfArrayBuffer = null; // OCR output buffer
   let objectUrl = null;
   let lastProgressPhase = '';
+  let pdfPassword = null;
+  let encryptedDetected = false;
 
   function log(msg){
     const time = new Date().toLocaleTimeString('en-US',{hour12:false});
@@ -138,6 +147,10 @@
     if(f.type !== 'application/pdf'){ log('Rejected: not a PDF.'); return; }
     selectedFile = f; fileInfo.textContent = `${f.name} (${(f.size/1024/1024).toFixed(2)} MB)`; log(`Loaded file: ${f.name}`);
     btnConvert.disabled = false; btnDownload.disabled = true; pdfArrayBuffer=null; if(objectUrl){ URL.revokeObjectURL(objectUrl); objectUrl=null; }
+  // Reset password UI if a new file is chosen
+  encryptedDetected = false; pdfPassword=null;
+  document.getElementById('password-wrapper').classList.add('hidden');
+  document.getElementById('pdf-password').value='';
   }
 
   async function initWorker(){
@@ -145,28 +158,41 @@
     log('Initializing OCR engine (one-time)...');
     setProgress(2,'Init OCR');
     try {
-      worker = await Tesseract.createWorker({ logger: m => {
-        if(m.status && lastProgressPhase !== m.status){ lastProgressPhase = m.status; log('STATUS: '+m.status); }
-        if(m.status === 'recognizing text') {
-          // m.progress between 0 and 1 for current page
-          // Page level progress handled separately; keep here for granularity
+      worker = await Tesseract.createWorker({
+        // Explicit paths mitigate some CSP / CDN resolution issues.
+        workerPath: 'https://unpkg.com/tesseract.js@5.0.2/dist/worker.min.js',
+        corePath:   'https://unpkg.com/tesseract.js-core@5.0.0/tesseract-core.wasm.js',
+        langPath:   'https://tessdata.projectnaptha.com/5.0.0_fast',
+        logger: m => {
+          if(m.status && lastProgressPhase !== m.status){ lastProgressPhase = m.status; log('STATUS: '+m.status); }
         }
-      }});
+      });
       await worker.loadLanguage('eng');
       await worker.initialize('eng');
       await worker.setParameters({ tessedit_create_pdf: '1' });
+      log('OCR engine ready.');
       return worker;
     } catch(e){
-      log('Failed to initialize OCR engine. Check your network (needs to download traineddata).');
+      console.error('Worker init error', e);
+      log('Init error: ' + (e?.message || JSON.stringify(e) || 'Unknown')); 
+      log('Troubleshooting: 1) Hard refresh (Ctrl+F5) to bypass cache. 2) Check network console for blocked CDN requests. 3) Corporate/firewall may block unpkg or tessdata CDN.');
       throw e;
     }
   }
 
-  async function renderPdfPages(file){
+  async function renderPdfPages(file, password){
     if(!window.pdfjsLib){ throw new Error('pdf.js not loaded'); }
-    const url = URL.createObjectURL(file);
-    const loadingTask = pdfjsLib.getDocument({ url });
-    const pdf = await loadingTask.promise;
+    const arrayBuf = await file.arrayBuffer();
+    let pdf;
+    try {
+      pdf = await pdfjsLib.getDocument({ data: arrayBuf, password }).promise;
+    } catch(e){
+      if(e && e.name === 'PasswordException'){
+        // Indicate password required or incorrect
+        throw { type: 'PASSWORD', code: e.code, message: e.message };
+      }
+      throw e;
+    }
     log(`PDF has ${pdf.numPages} page(s).`);
     const canvases = [];
     for(let pageNum=1; pageNum<=pdf.numPages; pageNum++){
@@ -179,18 +205,17 @@
       canvases.push(canvas);
       log(`Rendered page ${pageNum}/${pdf.numPages}`);
     }
-    URL.revokeObjectURL(url);
     return canvases;
   }
 
   btnConvert.addEventListener('click', async ()=>{
     if(!selectedFile) return;
     btnConvert.disabled = true; btnDownload.disabled = true; pdfArrayBuffer=null; setProgress(0,'Preparing');
-    log('Starting OCR (multi-page supported). Keep tab active.');
+  log('Starting OCR (multi-page supported). Keep tab active. If it stalls at init, try Ctrl+F5.');
     const startAll = performance.now();
     try {
       const w = await initWorker();
-      const canvases = await renderPdfPages(selectedFile);
+      const canvases = await renderPdfPages(selectedFile, pdfPassword);
       const total = canvases.length;
       for(let i=0;i<canvases.length;i++){
         const pageStart = performance.now();
@@ -209,9 +234,21 @@
       const totalSecs = ((performance.now()-startAll)/1000).toFixed(1);
       log(`Total time: ${totalSecs}s`);
     } catch(err){
+      if(err && err.type === 'PASSWORD'){
+        encryptedDetected = true;
+        log((err.code === 1 ? 'Password required.' : 'Wrong password.') + ' Please enter password and click Convert again.');
+        document.getElementById('password-wrapper').classList.remove('hidden');
+        btnConvert.disabled = false;
+        setProgress(0, err.code === 1 ? 'Password Needed' : 'Wrong Password');
+        return;
+      }
       console.error(err); log('Error: '+ (err.message||err)); setProgress(0,'Failed'); btnConvert.disabled = false;
     }
   });
+
+  // Capture password input changes
+  const passwordInput = document.getElementById('pdf-password');
+  passwordInput.addEventListener('input', e => { pdfPassword = e.target.value || null; });
 
   btnDownload.addEventListener('click', ()=>{
     if(!pdfArrayBuffer) return;
