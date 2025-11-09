@@ -10,6 +10,10 @@
   <script src="https://unpkg.com/tesseract.js@5.0.2/dist/tesseract.min.js?v=2"></script>
   <!-- pdf.js for rendering PDF pages to canvases before OCR -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js?v=2" integrity="sha512-eJqggrdM1vJrqVYgOL9gir1PAlb08otA6DphMstewdAkSK+QGdIKF3Gtg9Ojd0NbXwV3kDLEZHnpKNTM3t85ow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- Performance hints: Preload worker, wasm & traineddata for faster, steadier init -->
+  <link rel="preload" as="script" href="https://unpkg.com/tesseract.js@5.0.2/dist/worker.min.js" crossorigin="anonymous" />
+  <link rel="preload" as="fetch" href="https://tessdata.projectnaptha.com/5.0.0_fast/eng.traineddata.gz" crossorigin="anonymous" />
+  <link rel="preload" as="script" href="https://unpkg.com/tesseract.js-core@5.0.0/tesseract-core.wasm.js" crossorigin="anonymous" />
   <script>
     // Configure pdf.js worker
     if (window['pdfjsLib']) {
@@ -69,7 +73,18 @@
             <button id="btn-download" disabled class="w-full py-2.5 rounded-md font-semibold bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-white shadow hover:bg-emerald-500 transition">3. Download Result</button>
             <button id="btn-reset" class="w-full py-2.5 rounded-md font-medium bg-stone-200 text-stone-700 hover:bg-stone-300 transition">Reset</button>
             <div class="pt-2 border-t border-stone-200 text-xs text-stone-500 leading-snug">
-              Optimized for speed. <label class="inline-flex items-center gap-1 cursor-pointer ms-1"><input id="toggle-quality" type="checkbox" class="accent-sky-600" /> <span>High Quality (slower)</span></label>
+              <div class="flex flex-col gap-2">
+                <div class="flex items-center gap-2">
+                  <label class="font-medium text-stone-600">Optimization Level</label>
+                  <select id="opt-level" class="border border-stone-300 rounded px-2 py-1 bg-white text-stone-700">
+                    <option value="0">O0 - No optimization (highest quality)</option>
+                    <option value="1" selected>O1 - Mild (grayscale + modest downsample)</option>
+                    <option value="2">O2 - Aggressive (grayscale + threshold)</option>
+                    <option value="3">O3 - Max speed (binarize + strong downsample)</option>
+                  </select>
+                </div>
+                <p class="text-[10px] leading-snug text-stone-500">Higher level => faster & smaller, potential quality loss. Inspired by OCRmyPDF optimization tiers.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -122,7 +137,30 @@
   let lastProgressPhase = '';
   let pdfPassword = null;
   let encryptedDetected = false;
-  let highQuality = false; // unchecked = faster
+  let optimizationLevel = 1; // 0..3
+  let initTimeMs = null; let initStart = null;
+  const ASSET_CACHE_NAME = 'ocr-assets-v1';
+  const OCR_ASSETS = [
+    'https://unpkg.com/tesseract.js@5.0.2/dist/worker.min.js',
+    'https://unpkg.com/tesseract.js-core@5.0.0/tesseract-core.wasm.js',
+    'https://tessdata.projectnaptha.com/5.0.0_fast/eng.traineddata.gz'
+  ];
+
+  // Prefetch & cache assets early to smooth init variability
+  async function prefetchAssets(){
+    if(!('caches' in window)) return; // older browsers
+    try {
+      const cache = await caches.open(ASSET_CACHE_NAME);
+      await Promise.all(OCR_ASSETS.map(async url => {
+        const match = await cache.match(url);
+        if(!match){
+          const res = await fetch(url, { mode:'cors', integrity: undefined, cache:'reload' }).catch(()=>null);
+          if(res && res.ok) await cache.put(url, res.clone());
+        }
+      }));
+      log('Assets prefetched to cache.');
+    } catch(e){ /* silent */ }
+  }
 
   function log(msg){
     const time = new Date().toLocaleTimeString('en-US',{hour12:false});
@@ -159,7 +197,8 @@
 
   async function initWorker(){
     if(worker) return worker;
-    log('Init OCR engine...');
+    initStart = performance.now();
+    log('Init OCR engine (warming)...');
     setProgress(2,'Init');
     try {
       worker = await Tesseract.createWorker({
@@ -171,10 +210,18 @@
           if(m.status && lastProgressPhase !== m.status){ lastProgressPhase = m.status; log('STATUS: '+m.status); }
         }
       });
-      await worker.loadLanguage('eng');
+      // Attempt fast language first; fallback mirror if fails
+      try {
+        await worker.loadLanguage('eng');
+      } catch(langErr){
+        log('Primary lang mirror failed, retrying fallback...');
+        // Fallback to standard tessdata repo
+        await worker.loadLanguage('https://tessdata.projectnaptha.com/5.0.0/eng');
+      }
       await worker.initialize('eng');
       await worker.setParameters({ tessedit_create_pdf: '1' });
-      log('OCR engine ready.');
+      initTimeMs = performance.now() - initStart;
+      log('OCR engine ready in '+ initTimeMs.toFixed(0)+'ms (cached: '+ (initTimeMs<1500?'yes':'no') +').');
       return worker;
     } catch(e){
       console.error('Worker init error', e);
@@ -198,10 +245,9 @@
       throw e;
     }
     log(`Pages: ${pdf.numPages}`);
-    const scaleBase = highQuality ? 2.4 : 1.4; // lower scale => faster
-    for(let pageNum=1; pageNum<=pdf.numPages; pageNum++){
+      for(let pageNum=1; pageNum<=pdf.numPages; pageNum++){
       const page = await pdf.getPage(pageNum);
-      const viewport = page.getViewport({ scale: scaleBase });
+        const viewport = page.getViewport({ scale: calcScale(page, optimizationLevel) });
       // Use OffscreenCanvas if available for slightly better perf
       let canvas, ctx;
       if(typeof OffscreenCanvas !== 'undefined'){
@@ -216,7 +262,8 @@
       await page.render({ canvasContext: ctx, viewport }).promise;
       const renderMs = (performance.now()-startRender).toFixed(0);
       setProgress(((pageNum-1)/pdf.numPages)*85 + 5, `OCR Page ${pageNum}/${pdf.numPages}`);
-      const bmp = (canvas instanceof OffscreenCanvas) ? canvas.transferToImageBitmap() : canvas; // pass directly
+  applyPreprocess(canvas, ctx, optimizationLevel);
+  const bmp = (canvas instanceof OffscreenCanvas) ? canvas.transferToImageBitmap() : canvas; // pass directly
       const startOcr = performance.now();
       const { data } = await ocrWorker.recognize(bmp);
       log(`P${pageNum}: ${(performance.now()-startOcr).toFixed(1)}s OCR, ${renderMs}ms render, chars ${data.text.length}`);
@@ -226,7 +273,7 @@
   btnConvert.addEventListener('click', async ()=>{
     if(!selectedFile) return;
     btnConvert.disabled = true; btnDownload.disabled = true; pdfArrayBuffer=null; setProgress(0,'Preparing');
-    log(`Starting OCR (${highQuality ? 'HIGH QUALITY' : 'FAST'}). Keep tab active.`);
+  log(`Starting OCR (Level O${optimizationLevel}). Keep tab active.`);
     const startAll = performance.now();
     try {
       const w = await initWorker();
@@ -256,19 +303,63 @@
   const passwordInput = document.getElementById('pdf-password');
   passwordInput.addEventListener('input', e => { pdfPassword = e.target.value || null; });
 
-  // Quality toggle
-  document.getElementById('toggle-quality').addEventListener('change', e => { highQuality = e.target.checked; log('Mode: ' + (highQuality ? 'High Quality' : 'Fast')); });
+  // Optimization level change
+  document.getElementById('opt-level').addEventListener('change', e => { optimizationLevel = parseInt(e.target.value,10); log('Optimization Level set to O'+optimizationLevel); });
 
   // Preload worker during idle time after minimal user interaction to shorten perceived wait.
   let preloadScheduled = false;
   function schedulePreload(){
     if(preloadScheduled || worker) return; preloadScheduled = true;
-    const kickoff = ()=>initWorker().then(()=>log('OCR engine preloaded.')).catch(()=>{});
+  const kickoff = ()=>{ prefetchAssets().then(()=>initWorker()).then(()=>log('OCR engine preloaded.')).catch(()=>{}); };
     if('requestIdleCallback' in window){ requestIdleCallback(kickoff,{timeout:3500}); } else { setTimeout(kickoff, 2500); }
   }
   ['mousemove','scroll','keydown','touchstart'].forEach(evt => window.addEventListener(evt, schedulePreload, { once:true, passive:true }));
   // Also attempt after load in case no interaction
   window.addEventListener('load', ()=> setTimeout(schedulePreload, 1500));
+
+  // ---- Optimization helpers ----
+  function calcScale(page, level){
+    // Base unscaled viewport
+    const baseViewport = page.getViewport({ scale:1 });
+    const w = baseViewport.width; const h = baseViewport.height;
+    // Target max pixels per page (rough heuristics)
+    const maxPixels = [ w*h, 3_000_000, 2_000_000, 1_000_000 ][level];
+    if(level===0) return 2.4; // high quality fixed upscale
+    // Start from scale 2.0 for better accuracy; adjust down to meet maxPixels
+    let scale = 2.0;
+    let pixels = w*h*scale*scale;
+    if(pixels > maxPixels){
+      scale = Math.sqrt(maxPixels/(w*h));
+    }
+    // Slightly reduce scale for highest aggression
+    if(level===3) scale *= 0.95;
+    return Math.max(0.6, scale);
+  }
+
+  function applyPreprocess(canvas, ctx, level){
+    if(level===0) return; // no optimization
+    const w = canvas.width, h = canvas.height;
+    const imgData = ctx.getImageData(0,0,w,h);
+    const data = imgData.data;
+    // grayscale + optional threshold
+    let sum=0, len = data.length/4;
+    for(let i=0;i<data.length;i+=4){
+      const r=data[i], g=data[i+1], b=data[i+2];
+      let y = (r*0.299 + g*0.587 + b*0.114);
+      sum += y;
+      data[i]=data[i+1]=data[i+2]=y;
+    }
+    if(level>=2){
+      const avg = sum/len;
+      // dynamic threshold: bias lower for level 3
+      const thresh = (level===3 ? avg*0.9 : avg*0.95);
+      for(let i=0;i<data.length;i+=4){
+        const v = data[i] < thresh ? 0 : 255;
+        data[i]=data[i+1]=data[i+2]=v;
+      }
+    }
+    ctx.putImageData(imgData,0,0);
+  }
 
   btnDownload.addEventListener('click', ()=>{
     if(!pdfArrayBuffer) return;
