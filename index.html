@@ -8,44 +8,17 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
   <link rel="stylesheet" href="css/styles.css">
-  <style>
-    /* Custom eye-catching styles */
-    .hero {
-      background-color: #f5f5f5; /* light gray */
-      color: #333;
-      padding: 100px 0;
-    }
-    .btn-cv {
-      background-color: #ff6b6b;
-      color: #fff;
-      font-weight: bold;
-      border-radius: 50px;
-      padding: 10px 30px;
-    }
-    .social-links a {
-      margin: 0 10px;
-      transition: transform 0.3s;
-    }
-    .social-links a:hover {
-      transform: scale(1.2);
-    }
-    .img-custom {
-      border-radius: 50%;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    }
-  </style>
 </head>
-<body>
+<body class="homepage">
 
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+<nav class="navbar navbar-expand-md navbar-dark bg-dark sticky-top site-navbar">
   <div class="container">
-    <a class="navbar-brand" href="/">Muhamad Rausyan Fikri</a>
+    <a class="navbar-brand fw-semibold" href="/">Muhamad Rausyan Fikri</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
+      <ul class="navbar-nav ms-auto gap-lg-2">
         <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
         <li class="nav-item"><a class="nav-link" href="pages/research.html">Research</a></li>
         <li class="nav-item"><a class="nav-link" href="pages/publication.html">Publications</a></li>
@@ -56,111 +29,111 @@
   </div>
 </nav>
 
-<!-- Hero Section -->
-<section id="home" class="hero text-center animate__animated animate__fadeIn">
-  <div class="container">
-    <div class="row align-items-center">
-      <div class="col-md-6 mb-4">
-        <img src="img/hkmufi.JPG" alt="Muhamad Rausyan Fikri" class="img-fluid img-custom animate__animated animate__zoomIn">
-      </div>
-      <div class="col-md-6 text-center text-md-start">
-        <h1 class="display-4">Welcome to My Page</h1>
-        <p id="cv-subtitle" class="lead">Ph.D. student exploring Networked Control Systems, Distributed Optimization, Decision Making, and Robotics.</p>
-        <button class="btn btn-cv mt-3 animate__animated animate__pulse animate__infinite" onclick="generateCV()">Download CV (PDF)</button>
+<main>
+  <section id="home" class="hero-section animate__animated animate__fadeIn">
+    <div class="container hero-shell">
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-4 text-center">
+          <img src="img/hkmufi.JPG" alt="Muhamad Rausyan Fikri" class="img-fluid img-custom animate__animated animate__zoomIn">
+        </div>
+        <div class="col-lg-8">
+          <p class="hero-kicker mb-2">Doctoral Researcher · Tampere University</p>
+          <h1 class="hero-title">Control, robotics, and optimization for intelligent networked systems.</h1>
+          <p id="cv-subtitle" class="hero-subtitle">Ph.D. student exploring networked control systems, distributed optimization, decision making, and robotics.</p>
+          <div class="hero-actions d-flex flex-wrap gap-3">
+            <button class="btn btn-cv" onclick="generateCV()">Download CV (PDF)</button>
+            <a class="btn btn-outline-secondary" href="#about">Read profile</a>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- Social Links -->
-<section class="py-4 bg-white">
-  <div id="cv-contact" class="container text-center social-links">
-    <a href="https://www.linkedin.com/in/muhamad-rausyan-f-149182a6/" target="_blank"><img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" width="24"> LinkedIn</a>
-    <a href="https://github.com/mrfikri-ai" target="_blank"><img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" width="24"> GitHub</a>
-    <a href="https://sites.google.com/view/mrfikri/home" target="_blank"><img src="https://cdn-icons-png.flaticon.com/512/4618/4618727.png" alt="Website" width="24"> Website</a>
-    <a href="https://scholar.google.com/citations?user=JXZU3RAAAAAJ&hl=id" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Google_Scholar_logo.svg/768px-Google_Scholar_logo.svg.png" alt="GScholar" width="24"> GScholar</a>
-  </div>
-</section>
+  <section class="social-section">
+    <div id="cv-contact" class="container social-links">
+      <a href="https://www.linkedin.com/in/muhamad-rausyan-f-149182a6/" target="_blank" rel="noopener noreferrer"><img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" width="24"> LinkedIn</a>
+      <a href="https://github.com/mrfikri-ai" target="_blank" rel="noopener noreferrer"><img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" width="24"> GitHub</a>
+      <a href="https://sites.google.com/view/mrfikri/home" target="_blank" rel="noopener noreferrer"><img src="https://cdn-icons-png.flaticon.com/512/4618/4618727.png" alt="Website" width="24"> Website</a>
+      <a href="https://scholar.google.com/citations?user=JXZU3RAAAAAJ&hl=id" target="_blank" rel="noopener noreferrer"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Google_Scholar_logo.svg/768px-Google_Scholar_logo.svg.png" alt="Google Scholar" width="24"> Google Scholar</a>
+    </div>
+  </section>
 
-<!-- About Me -->
-<section id="about" class="p-5 bg-light">
-  <div class="container">
-    <h2 class="mb-4">About Me</h2>
-    <p id="cv-about">
-      In my previous career, I was a lecturer and an acting interim Head of Information Systems at Sampoerna University (SU), Indonesia. 
-      I was a Global lecturer for Systems and Industrial Engineering (SIE) and Electrical and Computer Engineering (ECE) study programs at the University of Arizona (UA), United States, part of collaboration between SU and The University of Arizona. 
-      I was also a former lab coordinator at IoT Lab and Cyber-Physical Systems Research Group (CPS) at SU. I received a B.Sc. in Computer Science and Electronics (CSE) from Universitas Gadjah Mada (UGM), Indonesia, 
-      and an M.Eng. degree in Systems and Control Engineering (SCE) from the Tokyo Institute of Technology (Tokyo Tech now Institute of Science Tokyo), Japan, in 2015 and 2018, respectively. 
-      I am currently pursuing my Ph.D. at Tampere University (TAU), Finland, in Automation Technology and Mechanical Engineering (ATME) 2022 
-      and am a member of the Intelligent Networked Systems Group (IINES). 
-      I am a member of IEEE, IFAC Affiliated, and the Finnish Society of Automation. 
-      I am also active in volunteering as a reviewer for TIM IEEE, Multiscale and Multidisciplinary Modeling, Experiments and Design, 
-      Kybernetics, IEEE Access, Biomimetics and Bioinspirations, Frontiers in Mechanical Engineering, and Journal of Engineering and Applied Science.
-    </p>
-    <h3 class="mt-4">Research interests include:</h3>
-    <ul>
-      <li>Networked control of multi-robot systems: coverage control, persistent monitoring, formation control</li>
-      <li>Decision-making & optimization</li>
-      <li>Dynamical systems, source localization, and machine learning</li>
-    </ul>
-    <p class="mt-4">
-      Emails: 
-      <a href="mailto:muhamad.fikri@tuni.fi">muhamad.fikri@tuni.fi</a>,  
-      <a href="mailto:mrfikri@ieee.org">mrfikri@ieee.org</a>
-    </p>
-  </div>
-</section>
+  <section id="about" class="content-section">
+    <div class="container content-card">
+      <h2>About Me</h2>
+      <p id="cv-about">
+        In my previous career, I was a lecturer and an acting interim Head of Information Systems at Sampoerna University (SU), Indonesia.
+        I was a Global lecturer for Systems and Industrial Engineering (SIE) and Electrical and Computer Engineering (ECE) study programs at the University of Arizona (UA), United States, part of collaboration between SU and The University of Arizona.
+        I was also a former lab coordinator at IoT Lab and Cyber-Physical Systems Research Group (CPS) at SU. I received a B.Sc. in Computer Science and Electronics (CSE) from Universitas Gadjah Mada (UGM), Indonesia,
+        and an M.Eng. degree in Systems and Control Engineering (SCE) from the Tokyo Institute of Technology (Tokyo Tech now Institute of Science Tokyo), Japan, in 2015 and 2018, respectively.
+        I am currently pursuing my Ph.D. at Tampere University (TAU), Finland, in Automation Technology and Mechanical Engineering (ATME) 2022
+        and am a member of the Intelligent Networked Systems Group (IINES).
+        I am a member of IEEE, IFAC Affiliated, and the Finnish Society of Automation.
+        I am also active in volunteering as a reviewer for TIM IEEE, Multiscale and Multidisciplinary Modeling, Experiments and Design,
+        Kybernetics, IEEE Access, Biomimetics and Bioinspirations, Frontiers in Mechanical Engineering, and Journal of Engineering and Applied Science.
+      </p>
+      <h3>Research interests include:</h3>
+      <ul>
+        <li>Networked control of multi-robot systems: coverage control, persistent monitoring, formation control</li>
+        <li>Decision-making & optimization</li>
+        <li>Dynamical systems, source localization, and machine learning</li>
+      </ul>
+      <p class="mt-4">
+        Emails:
+        <a href="mailto:muhamad.fikri@tuni.fi">muhamad.fikri@tuni.fi</a>,
+        <a href="mailto:mrfikri@ieee.org">mrfikri@ieee.org</a>
+      </p>
+    </div>
+  </section>
 
-<!-- News -->
-<section id="news" class="p-5 bg-light">
-  <div class="container">
-    <h2 class="mb-4">News</h2>
-    <ul>
-      <li>Jun 2025: Our paper about the challenges of IoT in Indonesia has been published in the Indonesian Journal</li>
-      <li>Jun 2025: Our paper about the human-swarm interface was accepted to IEEE CASE 2025</li>
-      <li>Jun 2025: Receive the Travel Grant from Finnish Automation</li>
-      <li>Oct 2024: Our paper presented at CASE 2024 has been published in IEEE Explore.</li>
-      <li>Oct 2024: Poster and abstract to Findrones 2024 is accepted for a book chapter </li>
-    </ul>
-  </div>
-</section>
+  <section id="news" class="content-section">
+    <div class="container content-card">
+      <h2>News</h2>
+      <ul>
+        <li>Jun 2025: Our paper about the challenges of IoT in Indonesia has been published in the Indonesian Journal</li>
+        <li>Jun 2025: Our paper about the human-swarm interface was accepted to IEEE CASE 2025</li>
+        <li>Jun 2025: Receive the Travel Grant from Finnish Automation</li>
+        <li>Oct 2024: Our paper presented at CASE 2024 has been published in IEEE Explore.</li>
+        <li>Oct 2024: Poster and abstract to Findrones 2024 is accepted for a book chapter </li>
+      </ul>
+    </div>
+  </section>
 
-<!-- Short Curriculum Vitae -->
-<section id="cv" class="p-5 bg-light">
-  <div class="container">
-    <h2 class="mb-4">Short Curriculum Vitae</h2>
-    <h3>Education</h3>
-    <ul>
-      <li>Ph.D. Automation Tech & Mech Eng, Tampere University, 2022-present</li>
-      <li>M.Eng. Systems & Control Eng, Tokyo Tech, 2018</li>
-      <li>B.Sc. Electronics & Instrumentation, UGM, 2015</li>
-    </ul>
-    <h3>Work Experience</h3>
-    <ul>
-      <li>In charge of Nebolab, IINES, Tampere University, 2024-present</li>
-      <li>Doctoral Researcher, Automation Tech & Mech Eng, Tampere University, 2022-present</li>
-      <li>Global Lecturer, Systems & Industrial Eng and ECE, University of Arizona, 2020-2022</li>
-      <li>Lecturer, Information Systems, Sampoerna University, 2019-2022</li>
-      <li>IoT Lab Consultant, Sampoerna University, 2019</li>
-      <li>Drone Engineer, PT Bukalapak.com, 2018-2019</li>
-    </ul>
-    <h3>Awards</h3>
-    <ul>
-      <li>Travel Grant, Finnish Society of Automation, Jun 2025 for IEEE CASE 2025</li>
-      <li>Travel Grant, Finnish Society of Automation, Jun 2024 for IEEE CASE 2024</li>
-    </ul>
-    <h3>Projects</h3>
-    <ul>
-      <li>Nebolab automation platform development</li>
-      <li>Networked control for multi-robot persistent monitoring</li>
-      <li>Human-swarm interface design</li>
-      <li>Dynamical systems, source localization, and machine learning</li>
-    </ul>
-  </div>
-</section>
+  <section id="cv" class="content-section section-last">
+    <div class="container content-card">
+      <h2>Short Curriculum Vitae</h2>
+      <h3>Education</h3>
+      <ul>
+        <li>Ph.D. Automation Tech & Mech Eng, Tampere University, 2022-present</li>
+        <li>M.Eng. Systems & Control Eng, Tokyo Tech, 2018</li>
+        <li>B.Sc. Electronics & Instrumentation, UGM, 2015</li>
+      </ul>
+      <h3>Work Experience</h3>
+      <ul>
+        <li>In charge of Nebolab, IINES, Tampere University, 2024-present</li>
+        <li>Doctoral Researcher, Automation Tech & Mech Eng, Tampere University, 2022-present</li>
+        <li>Global Lecturer, Systems & Industrial Eng and ECE, University of Arizona, 2020-2022</li>
+        <li>Lecturer, Information Systems, Sampoerna University, 2019-2022</li>
+        <li>IoT Lab Consultant, Sampoerna University, 2019</li>
+        <li>Drone Engineer, PT Bukalapak.com, 2018-2019</li>
+      </ul>
+      <h3>Awards</h3>
+      <ul>
+        <li>Travel Grant, Finnish Society of Automation, Jun 2025 for IEEE CASE 2025</li>
+        <li>Travel Grant, Finnish Society of Automation, Jun 2024 for IEEE CASE 2024</li>
+      </ul>
+      <h3>Projects</h3>
+      <ul>
+        <li>Nebolab automation platform development</li>
+        <li>Networked control for multi-robot persistent monitoring</li>
+        <li>Human-swarm interface design</li>
+        <li>Dynamical systems, source localization, and machine learning</li>
+      </ul>
+    </div>
+  </section>
+</main>
 
-<!-- Footer -->
-<footer class="bg-dark text-white text-center py-3">
+<footer class="site-footer text-center py-3">
   &copy; <span id="year"></span> Muhamad Rausyan Fikri. All rights reserved.
 </footer>
 
