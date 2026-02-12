@@ -1,83 +1,189 @@
-/* Styling for the circular image */
+:root {
+    --bg: #f5f7fb;
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+    --text: #152033;
+    --muted: #5a6475;
+    --primary: #2547a8;
+    --line: #e2e8f0;
+}
+
+body.homepage {
+    background: linear-gradient(180deg, #f3f6fb 0%, #f7f9fc 45%, #f3f6fb 100%);
+    color: var(--text);
+}
+
+.homepage .site-navbar {
+    background-color: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.homepage .nav-link {
+    font-weight: 500;
+    opacity: 0.92;
+}
+
+.homepage .site-navbar .navbar-brand,
+.homepage .site-navbar .nav-link {
+    color: #f8fafc;
+}
+
+.homepage .site-navbar .nav-link:hover,
+.homepage .site-navbar .nav-link:focus {
+    color: #ffffff;
+    opacity: 1;
+}
+
+.homepage .site-navbar .navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.45);
+}
+
+.homepage .hero-section {
+    padding: 64px 0 32px;
+}
+
+.homepage .hero-shell {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 2rem;
+    box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+}
+
 .img-custom {
-    width: 150px; /* Set the width of the circular image */
-    height: 150px; /* Set the height of the circular image */
-    border-radius: 50%; /* Make the image circular */
-    object-fit: cover; /* Ensure the image covers the circle */
-    display: block; /* Ensure image behaves like a block element */
-    margin: 0 auto; /* Center the image horizontally if needed */
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 6px solid #fff;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.25);
 }
 
-/* Container for social links */
+.homepage .hero-kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.homepage .hero-title {
+    font-size: clamp(1.8rem, 3.4vw, 2.8rem);
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+}
+
+.homepage .hero-subtitle {
+    color: var(--muted);
+    font-size: 1.1rem;
+    max-width: 62ch;
+}
+
+.btn-cv {
+    background-color: var(--primary);
+    color: #fff;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 0.62rem 1.4rem;
+}
+
+.btn-cv:hover {
+    color: #fff;
+    background-color: #1d3a8f;
+}
+
+.homepage .social-section {
+    padding: 0 0 1rem;
+}
+
 .social-links {
-    margin-top: 20px; /* Space above the section */
-    font-size: 1.2rem; /* Font size for social links */
-    margin-left: 20px; /* Optional: shift section to the right */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
 }
 
-/* Individual social link styling */
 .social-links a {
     display: inline-flex;
-    align-items: center; /* Vertically center-align the icon and text */
-    margin-right: 15px; /* Space between each social link */
-    text-decoration: none; /* Remove underline from links */
-    color: inherit; /* Inherit text color from parent */
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 500;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Icon styling within social links */
+.social-links a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.1);
+}
+
 .social-links img {
-    width: 20px; /* Width of the icon */
-    height: 20px; /* Height of the icon */
-    vertical-align: middle; /* Align the icon with the text */
-    margin-right: 5px; /* Space between icon and text */
+    width: 20px;
+    height: 20px;
 }
 
+.homepage .content-section {
+    padding: 1rem 0;
+}
 
-/* Style the footer */
-footer {
+.homepage .content-card {
+    max-width: 980px;
+    background: var(--surface-soft);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.homepage .content-card h2 {
+    font-size: 1.7rem;
+    margin-bottom: 1rem;
+}
+
+.homepage .content-card h3 {
+    margin-top: 1.25rem;
+    font-size: 1.2rem;
+}
+
+.homepage .content-card p,
+.homepage .content-card li {
+    color: #273449;
+    line-height: 1.7;
+}
+
+.homepage .section-last {
+    padding-bottom: 3.5rem;
+}
+
+.site-footer {
     text-align: center;
-    padding: 10px;
-    background-color: #f8f9fa;
+    background-color: #0f172a;
+    color: #cbd5e1;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* School icon */
 .image-container {
     display: flex;
-    flex-wrap: wrap; /* Allows images to wrap onto the next line if needed */
-    justify-content: center; /* Center align images horizontally */
-    gap: 10px; /* Space between images */
-    margin-top: 10px; /* Reduce space above images */
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
 }
 
 .image-container a {
-    display: block; /* Ensure each link is a block element */
-}
-.img-ugm {
-    width: 100px;
-    height: auto;
+    display: block;
 }
 
-.img-titech {
-    width: 100px;
-    height: auto;
-}
-
-.img-su {
-    width: 150px;
-    height: auto;
-}
-
-.img-ua {
-    width: 80px;
-    height: auto;
-}
-
-.img-tau {
-    width: 150px;
-    height: auto;
-}
-
-.img-aalto {
-    width: 80px;
-    height: auto;
-}
+.img-ugm { width: 100px; height: auto; }
+.img-titech { width: 100px; height: auto; }
+.img-su { width: 150px; height: auto; }
+.img-ua { width: 80px; height: auto; }
+.img-tau { width: 150px; height: auto; }
+.img-aalto { width: 80px; height: auto; }
