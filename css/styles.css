@@ -309,3 +309,51 @@ body.homepage {
 .img-ua { width: 80px; height: auto; }
 .img-tau { width: 150px; height: auto; }
 .img-aalto { width: 80px; height: auto; }
+
+/* Research page blocks (scoped to Minima pages) */
+body.minima .research-item h2 {
+  margin-top: 0;
+}
+
+body.minima .media-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.25rem;
+  align-items: start;
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 900px) {
+  body.minima .media-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Responsive 16:9 embeds (no Bootstrap needed) */
+body.minima .ratio-16x9 {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+body.minima .ratio-16x9 iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Buttons aligned like a small resources panel */
+body.minima .btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Small utility spacing */
+body.minima .mt-12 { margin-top: 12px; }
