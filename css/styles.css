@@ -5,7 +5,7 @@
     --text: #152033;
     --muted: #5a6475;
     --primary: #2547a8;
-    --nav-bg: #ffffff;
+    --nav-bg: #dfe9f7;
     --nav-text: #1f355c;
     --line: #e2e8f0;
 }
@@ -18,7 +18,7 @@ body.homepage {
 .homepage .site-navbar {
     background-color: var(--nav-bg);
     backdrop-filter: blur(6px);
-    border-bottom: 1px solid #dbe4f2;
+    border-bottom: 1px solid #c7d5ee;
 }
 
 .homepage .nav-link {
