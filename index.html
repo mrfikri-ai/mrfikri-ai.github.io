@@ -11,7 +11,7 @@
 </head>
 <body class="homepage">
 
-<nav class="navbar navbar-expand-md navbar-dark bg-dark sticky-top site-navbar">
+<nav class="navbar navbar-expand-md navbar-light sticky-top site-navbar">
   <div class="container">
     <a class="navbar-brand fw-semibold" href="/">Muhamad Rausyan Fikri</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,14 +49,6 @@
     </div>
   </section>
 
-  <section class="social-section">
-    <div id="cv-contact" class="container social-links">
-      <a href="https://www.linkedin.com/in/muhamad-rausyan-f-149182a6/" target="_blank" rel="noopener noreferrer"><img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" width="24"> LinkedIn</a>
-      <a href="https://github.com/mrfikri-ai" target="_blank" rel="noopener noreferrer"><img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" width="24"> GitHub</a>
-      <a href="https://sites.google.com/view/mrfikri/home" target="_blank" rel="noopener noreferrer"><img src="https://cdn-icons-png.flaticon.com/512/4618/4618727.png" alt="Website" width="24"> Website</a>
-      <a href="https://scholar.google.com/citations?user=JXZU3RAAAAAJ&hl=id" target="_blank" rel="noopener noreferrer"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Google_Scholar_logo.svg/768px-Google_Scholar_logo.svg.png" alt="Google Scholar" width="24"> Google Scholar</a>
-    </div>
-  </section>
 
   <section id="about" class="content-section">
     <div class="container content-card">
@@ -89,6 +81,7 @@
   <section id="news" class="content-section">
     <div class="container content-card">
       <h2>News</h2>
+      <div class="news-scroll" aria-label="Past news">
       <ul>
         <li>Jun 2025: Our paper about the challenges of IoT in Indonesia has been published in the Indonesian Journal</li>
         <li>Jun 2025: Our paper about the human-swarm interface was accepted to IEEE CASE 2025</li>
@@ -96,45 +89,20 @@
         <li>Oct 2024: Our paper presented at CASE 2024 has been published in IEEE Explore.</li>
         <li>Oct 2024: Poster and abstract to Findrones 2024 is accepted for a book chapter </li>
       </ul>
+      </div>
     </div>
   </section>
 
-  <section id="cv" class="content-section section-last">
-    <div class="container content-card">
-      <h2>Short Curriculum Vitae</h2>
-      <h3>Education</h3>
-      <ul>
-        <li>Ph.D. Automation Tech & Mech Eng, Tampere University, 2022-present</li>
-        <li>M.Eng. Systems & Control Eng, Tokyo Tech, 2018</li>
-        <li>B.Sc. Electronics & Instrumentation, UGM, 2015</li>
-      </ul>
-      <h3>Work Experience</h3>
-      <ul>
-        <li>In charge of Nebolab, IINES, Tampere University, 2024-present</li>
-        <li>Doctoral Researcher, Automation Tech & Mech Eng, Tampere University, 2022-present</li>
-        <li>Global Lecturer, Systems & Industrial Eng and ECE, University of Arizona, 2020-2022</li>
-        <li>Lecturer, Information Systems, Sampoerna University, 2019-2022</li>
-        <li>IoT Lab Consultant, Sampoerna University, 2019</li>
-        <li>Drone Engineer, PT Bukalapak.com, 2018-2019</li>
-      </ul>
-      <h3>Awards</h3>
-      <ul>
-        <li>Travel Grant, Finnish Society of Automation, Jun 2025 for IEEE CASE 2025</li>
-        <li>Travel Grant, Finnish Society of Automation, Jun 2024 for IEEE CASE 2024</li>
-      </ul>
-      <h3>Projects</h3>
-      <ul>
-        <li>Nebolab automation platform development</li>
-        <li>Networked control for multi-robot persistent monitoring</li>
-        <li>Human-swarm interface design</li>
-        <li>Dynamical systems, source localization, and machine learning</li>
-      </ul>
-    </div>
-  </section>
 </main>
 
-<footer class="site-footer text-center py-3">
-  &copy; <span id="year"></span> Muhamad Rausyan Fikri. All rights reserved.
+<footer class="site-footer text-center py-4">
+  <div id="cv-contact" class="container social-links footer-social-links mb-3">
+    <a href="https://www.linkedin.com/in/muhamad-rausyan-f-149182a6/" target="_blank" rel="noopener noreferrer"><img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" width="24"> LinkedIn</a>
+    <a href="https://github.com/mrfikri-ai" target="_blank" rel="noopener noreferrer"><img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" width="24"> GitHub</a>
+    <a href="https://sites.google.com/view/mrfikri/home" target="_blank" rel="noopener noreferrer"><img src="https://cdn-icons-png.flaticon.com/512/4618/4618727.png" alt="Website" width="24"> Website</a>
+    <a href="https://scholar.google.com/citations?user=JXZU3RAAAAAJ&hl=id" target="_blank" rel="noopener noreferrer"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Google_Scholar_logo.svg/768px-Google_Scholar_logo.svg.png" alt="Google Scholar" width="24"> Google Scholar</a>
+  </div>
+  <div>&copy; <span id="year"></span> Muhamad Rausyan Fikri. All rights reserved.</div>
 </footer>
 
 <!-- JS Dependencies -->
@@ -211,13 +179,7 @@
       'Email: muhammad.fikri@tuni.fi, mrfikri@ieee.org'
     );
 
-    // 3) Short CV sections
-    drawSection('Education',        '#cv h3:nth-of-type(1) + ul li', true);
-    drawSection('Work Experience',  '#cv h3:nth-of-type(2) + ul li', true);
-    drawSection('Awards',           '#cv h3:nth-of-type(3) + ul li', true);
-    drawSection('Projects',         '#cv h3:nth-of-type(4) + ul li', true);
-
-    // 4) Publications
+    // 3) Publications
     drawSection('Publications', '');  // just title + underline
     const resp = await fetch('pages/publication.html');
     const docHtml = await resp.text();

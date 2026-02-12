@@ -5,6 +5,8 @@
     --text: #152033;
     --muted: #5a6475;
     --primary: #2547a8;
+    --nav-bg: #dfe9f7;
+    --nav-text: #1f355c;
     --line: #e2e8f0;
 }
 
@@ -14,9 +16,9 @@ body.homepage {
 }
 
 .homepage .site-navbar {
-    background-color: rgba(15, 23, 42, 0.92);
+    background-color: var(--nav-bg);
     backdrop-filter: blur(6px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid #c7d5ee;
 }
 
 .homepage .nav-link {
@@ -26,17 +28,21 @@ body.homepage {
 
 .homepage .site-navbar .navbar-brand,
 .homepage .site-navbar .nav-link {
-    color: #f8fafc;
+    color: var(--nav-text);
 }
 
 .homepage .site-navbar .nav-link:hover,
 .homepage .site-navbar .nav-link:focus {
-    color: #ffffff;
+    color: #0f2448;
     opacity: 1;
 }
 
 .homepage .site-navbar .navbar-toggler {
-    border-color: rgba(255, 255, 255, 0.45);
+    border-color: #94a9cc;
+}
+
+.homepage .site-navbar .navbar-toggler-icon {
+    filter: invert(20%) sepia(21%) saturate(1048%) hue-rotate(184deg) brightness(95%) contrast(92%);
 }
 
 .homepage .hero-section {
@@ -91,10 +97,6 @@ body.homepage {
 .btn-cv:hover {
     color: #fff;
     background-color: #1d3a8f;
-}
-
-.homepage .social-section {
-    padding: 0 0 1rem;
 }
 
 .social-links {
@@ -157,15 +159,45 @@ body.homepage {
     line-height: 1.7;
 }
 
-.homepage .section-last {
-    padding-bottom: 3.5rem;
+
+.homepage .news-scroll {
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.homepage .news-scroll ul {
+    margin-bottom: 0;
+}
+
+.homepage .news-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+.homepage .news-scroll::-webkit-scrollbar-thumb {
+    background: #c0cde3;
+    border-radius: 999px;
 }
 
 .site-footer {
     text-align: center;
-    background-color: #0f172a;
-    color: #cbd5e1;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: #1f2d46;
+    color: #dbe6f9;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.footer-social-links {
+    padding-top: 0.25rem;
+}
+
+.footer-social-links a {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: #eef4ff;
+}
+
+.footer-social-links a:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
 }
 
 /* School icon */
