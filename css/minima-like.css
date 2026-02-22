@@ -40,6 +40,21 @@ body.minima .site-title{
   color: var(--text);
 }
 
+/* Reset header links so Bootstrap/global rules can't "box" them */
+body.minima .site-title,
+body.minima .site-title:visited,
+body.minima .site-title:hover,
+body.minima .site-title:active{
+  text-decoration: none !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
 body.minima .small-caps{
   font-variant: small-caps;
   letter-spacing: 1px;
@@ -68,6 +83,18 @@ body.minima .trigger{
 body.minima .page-link{
   color: var(--text);
   font-weight: 300;
+}
+
+body.minima .page-link,
+body.minima .page-link:visited,
+body.minima .page-link:hover,
+body.minima .page-link:active{
+  text-decoration: none !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
 
 body.minima .page-link:hover{ color: var(--primary); }
