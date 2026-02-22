@@ -1,6 +1,8 @@
 
 
 /* Base */
+html, body{ margin: 0; padding: 0; }
+
 body.minima{
   font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-weight: 300;
@@ -8,6 +10,7 @@ body.minima{
   color: var(--text);
   line-height: 1.7;
   margin: 0;
+  padding: 0;
 }
 
 body.minima a{ color: var(--primary); text-decoration: none; }
@@ -23,7 +26,8 @@ body.minima .wrapper{
 body.minima .site-header{
   background: transparent;
   border-bottom: 1px solid var(--line);
-  padding: 14px 0;
+  margin: 0 !important;
+  padding: 14px 0 !important;
 }
 
 body.minima .site-header .wrapper{
