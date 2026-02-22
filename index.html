@@ -106,7 +106,7 @@
                 </p>
 
                 <p class="mt">
-                  <a class="btn-minima" href="#" onclick="generateCV(); return false;">Download CV (PDF)</a>
+                  <a class="btn-minima" href="files/Fikri_CV_long.pdf" target="_blank" rel="noopener">Download CV (PDF)</a>
                 </p>
               </div>
             </div>
@@ -217,97 +217,8 @@
     </div>
   </footer>
 
-  <!-- JS Dependencies (your existing CV generator stays) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
-
-    async function generateCV() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-      const m = 40, lh = 16;
-      let y = m;
-      const H = doc.internal.pageSize.getHeight(),
-            W = doc.internal.pageSize.getWidth();
-
-      function newPageIfNeeded(extra = 0) {
-        if (y + extra > H - m) {
-          doc.addPage();
-          y = m;
-        }
-      }
-
-      function drawSection(title, content, isList=false) {
-        newPageIfNeeded(lh*2);
-        doc.setFont('helvetica','bold').setFontSize(14).text(title, m, y);
-        y += lh*0.6;
-        doc.setDrawColor(150).setLineWidth(0.5).line(m, y, W-m, y);
-        y += lh;
-        doc.setFont('helvetica','normal').setFontSize(10);
-
-        if (isList) {
-          document.querySelectorAll(content).forEach(li => {
-            newPageIfNeeded(lh);
-            doc.text('• ' + li.textContent.trim(), m+10, y);
-            y += lh;
-          });
-        } else {
-          const lines = doc.splitTextToSize(content, W - m*2);
-          lines.forEach(line => {
-            newPageIfNeeded(lh);
-            doc.text(line, m, y);
-            y += lh;
-          });
-        }
-        y += lh*0.5;
-      }
-
-      doc.setFont('helvetica','bold').setFontSize(20).text('Muhamad Rausyan Fikri', m, y);
-      y += lh;
-      doc.setFont('helvetica','normal').setFontSize(12);
-      const subtitle = document.getElementById('cv-subtitle').textContent.trim();
-      const subtitleLines = doc.splitTextToSize(subtitle, W - m*2);
-      subtitleLines.forEach(line => {
-        newPageIfNeeded(lh);
-        doc.text(line, m, y);
-        y += lh;
-      });
-      doc.setDrawColor(150).setLineWidth(1).line(m, y, W-m, y);
-      y += lh;
-
-      drawSection('Contact','Email: muhamad.fikri@tuni.fi, mrfikri@ieee.org');
-
-      drawSection('Publications','');
-      const resp = await fetch('pages/publication.html');
-      const docHtml = await resp.text();
-      const parser = new DOMParser();
-      const pubDoc = parser.parseFromString(docHtml, 'text/html');
-      const pubSecs = [
-        { id:'books', title:'Books / Book Chapters' },
-        { id:'conferences', title:'Conference Proceedings' },
-        { id:'journals', title:'Journals' }
-      ];
-      doc.setFont('helvetica','normal').setFontSize(10);
-      pubSecs.forEach(s => {
-        const el = pubDoc.getElementById(s.id);
-        if (!el) return;
-        newPageIfNeeded(lh*2);
-        doc.text(s.title, m+10, y);
-        y += lh;
-        el.querySelectorAll('li').forEach(li => {
-          const txt = '• ' + li.textContent.trim();
-          const wrapped = doc.splitTextToSize(txt, W - m*2 - 20);
-          wrapped.forEach(line => {
-            newPageIfNeeded(lh);
-            doc.text(line, m+20, y);
-            y += lh;
-          });
-          y += lh*0.3;
-        });
-      });
-
-      doc.save('CV_Muhamad_Rausyan_Fikri.pdf');
-    }
   </script>
 
 </body>
