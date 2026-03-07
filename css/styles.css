@@ -205,6 +205,35 @@ body.minima .resources.under-video {
 
 body.minima .resources.under-video .btn-row {
     justify-content: center;
+    align-items: flex-start;
+}
+
+body.minima .bibtex-details {
+    position: relative;
+}
+
+body.minima .bibtex-summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+body.minima .bibtex-summary::-webkit-details-marker {
+    display: none;
+}
+
+body.minima .bibtex-code {
+    margin: 0.75rem 0 0;
+    padding: 0.85rem;
+    width: min(100%, 420px);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--text);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
 }
 
 body.minima .media-grid {
