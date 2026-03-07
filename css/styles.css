@@ -311,6 +311,10 @@ body.homepage {
 .img-aalto { width: 80px; height: auto; }
 
 /* Research page blocks (scoped to Minima pages) */
+body.minima.research-page .wrapper {
+        max-width: 1240px;
+}
+
 body.minima .research-item h2 {
   margin-top: 0;
 }
