@@ -313,6 +313,8 @@ body.homepage {
 /* Research page blocks (scoped to Minima pages) */
 body.minima.research-page .wrapper {
     max-width: 1480px;
+    padding-left: 24px;
+    padding-right: 24px;
 }
 
 body.minima .research-item h2 {
@@ -353,6 +355,30 @@ body.minima .research-group-span-2 {
     margin-top: 0;
 }
 
+body.minima .research-supergrid > .research-group-span-2:first-child {
+    grid-column: 1 / span 2;
+}
+
+body.minima .research-supergrid > .research-group-span-2:nth-child(2) {
+    grid-column: 3 / span 2;
+}
+
+body.minima #voronoi {
+    grid-column: 1;
+}
+
+body.minima #human-swarm {
+    grid-column: 2;
+}
+
+body.minima #odor-sensing {
+    grid-column: 3;
+}
+
+body.minima #animal-loop {
+    grid-column: 4;
+}
+
 body.minima .research-panel-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -363,18 +389,21 @@ body.minima .research-panel {
     background: var(--surface-soft);
     border: 1px solid var(--line);
     border-radius: 18px;
-    padding: 1.25rem;
+    padding: 1rem;
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+    min-width: 0;
 }
 
 body.minima .research-panel h3 {
     margin-top: 0;
     margin-bottom: 0.5rem;
-    font-size: 1.15rem;
+    font-size: 1.02rem;
+    line-height: 1.35;
 }
 
 body.minima .research-panel p {
     margin-bottom: 0.9rem;
+    font-size: 0.95rem;
 }
 
 body.minima .research-video-stack {
@@ -383,7 +412,7 @@ body.minima .research-video-stack {
 }
 
 body.minima .research-video-frame {
-    width: min(100%, 260px);
+    width: min(100%, 220px);
     margin-left: auto;
     margin-right: auto;
 }
@@ -413,6 +442,18 @@ body.minima .media-grid {
         grid-column: span 2;
     }
 
+    body.minima .research-supergrid > .research-group-span-2:first-child,
+    body.minima .research-supergrid > .research-group-span-2:nth-child(2) {
+        grid-column: span 2;
+    }
+
+    body.minima #voronoi,
+    body.minima #human-swarm,
+    body.minima #odor-sensing,
+    body.minima #animal-loop {
+        grid-column: auto;
+    }
+
     body.minima .research-panel-grid {
         grid-template-columns: 1fr;
     }
@@ -428,6 +469,11 @@ body.minima .media-grid {
     }
 
     body.minima .research-group-span-2 {
+        grid-column: span 1;
+    }
+
+    body.minima .research-supergrid > .research-group-span-2:first-child,
+    body.minima .research-supergrid > .research-group-span-2:nth-child(2) {
         grid-column: span 1;
     }
 
