@@ -161,12 +161,6 @@ body.minima .kicker{
   font-size: 0.95rem;
 }
 
-body.minima .headline{
-  margin: 0 0 10px;
-  font-size: 28px;
-  font-weight: 300;
-}
-
 body.minima .mt{ margin-top: 14px; }
 
 @media (max-width: 760px){
