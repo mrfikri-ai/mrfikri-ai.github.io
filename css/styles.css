@@ -312,7 +312,7 @@ body.homepage {
 
 /* Research page blocks (scoped to Minima pages) */
 body.minima.research-page .wrapper {
-        max-width: 1240px;
+    max-width: 1480px;
 }
 
 body.minima .research-item h2 {
@@ -341,20 +341,16 @@ body.minima .research-group-header p {
     color: var(--muted);
 }
 
-body.minima .research-columns {
+body.minima .research-supergrid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 1.75rem;
     align-items: start;
 }
 
-body.minima .research-group-column {
+body.minima .research-group-span-2 {
+    grid-column: span 2;
     margin-top: 0;
-}
-
-body.minima .research-panel-list {
-    display: grid;
-    gap: 1.5rem;
 }
 
 body.minima .research-panel-grid {
@@ -387,7 +383,7 @@ body.minima .research-video-stack {
 }
 
 body.minima .research-video-frame {
-    width: min(100%, 520px);
+    width: min(100%, 260px);
     margin-left: auto;
     margin-right: auto;
 }
@@ -409,8 +405,12 @@ body.minima .media-grid {
 }
 
 @media (max-width: 900px) {
-    body.minima .research-columns {
-        grid-template-columns: 1fr;
+    body.minima .research-supergrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    body.minima .research-group-span-2 {
+        grid-column: span 2;
     }
 
     body.minima .research-panel-grid {
@@ -420,6 +420,20 @@ body.minima .media-grid {
   body.minima .media-grid {
     grid-template-columns: 1fr;
   }
+}
+
+@media (max-width: 640px) {
+    body.minima .research-supergrid {
+        grid-template-columns: 1fr;
+    }
+
+    body.minima .research-group-span-2 {
+        grid-column: span 1;
+    }
+
+    body.minima .research-video-frame {
+        width: 100%;
+    }
 }
 
 /* Responsive 16:9 embeds (no Bootstrap needed) */
