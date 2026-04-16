@@ -93,6 +93,11 @@ body.minima .research-group-span-2 {
     margin-top: 0;
 }
 
+body.minima .research-group-full {
+    grid-column: 1 / -1;
+    margin-top: 0;
+}
+
 body.minima .research-supergrid > .research-group-span-2:first-child {
     grid-column: 1 / span 2;
 }
@@ -137,8 +142,16 @@ body.minima #mapf-demo {
     grid-column: 3 / span 2;
 }
 
+body.minima #networked-systems {
+    grid-column: 1 / -1;
+}
+
 body.minima .research-panel-span-2 {
     grid-column: span 2;
+}
+
+body.minima .research-panel-span-4 {
+    grid-column: 1 / -1;
 }
 
 body.minima .research-panel-grid {
@@ -193,11 +206,34 @@ body.minima .research-gif-frame-wide {
     width: min(100%, 460px);
 }
 
+body.minima .research-gif-frame-gallery {
+    width: 100%;
+    max-width: 340px;
+}
+
 body.minima .research-gif-frame img,
 body.minima .research-gif-frame video {
     display: block;
     width: 100%;
     height: auto;
+}
+
+body.minima .research-gif-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem;
+    margin-top: 1rem;
+}
+
+body.minima .research-gif-card {
+    margin: 0;
+    text-align: center;
+}
+
+body.minima .research-gif-card figcaption {
+    margin-top: 0.7rem;
+    font-size: 0.92rem;
+    color: var(--muted);
 }
 
 body.minima .resources.under-video {
@@ -265,13 +301,18 @@ body.minima .media-grid {
     body.minima #animal-loop,
     body.minima #optimal-transport-cbf,
     body.minima #optimal-transport-sensing,
-    body.minima #mapf-demo {
+        body.minima #mapf-demo,
+        body.minima #networked-systems {
         grid-column: auto;
     }
 
     body.minima .research-panel-grid {
         grid-template-columns: 1fr;
     }
+
+        body.minima .research-gif-gallery {
+                grid-template-columns: 1fr;
+        }
 
   body.minima .media-grid {
     grid-template-columns: 1fr;
@@ -284,6 +325,10 @@ body.minima .media-grid {
     }
 
     body.minima .research-group-span-2 {
+        grid-column: span 1;
+    }
+
+    body.minima .research-group-full {
         grid-column: span 1;
     }
 
