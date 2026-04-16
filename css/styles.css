@@ -208,7 +208,7 @@ body.minima .research-gif-frame-wide {
 
 body.minima .research-gif-frame-gallery {
     width: 100%;
-    max-width: 340px;
+    max-width: 390px;
 }
 
 body.minima .research-gif-frame img,
@@ -223,6 +223,7 @@ body.minima .research-gif-gallery {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1.25rem;
     margin-top: 1rem;
+    justify-items: center;
 }
 
 body.minima .research-gif-card {
