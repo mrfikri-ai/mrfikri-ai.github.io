@@ -7,17 +7,18 @@
   <title>Research | Muhamad Rausyan Fikri</title>
 
   <!-- Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600&display=swap" rel="stylesheet">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+  <meta name="description" content="Research by Muhamad Rausyan Fikri: persistent monitoring, resilient networked control, belief-space pursuit, and 3D inspection and geometric safety.">
 
   <!-- Your CSS (order matters: base first, overrides after) -->
   <link rel="stylesheet" href="../css/styles.css?v=20260307" />
   <link rel="stylesheet" href="../css/minima-like.css?v=20260307" />
+  <link rel="stylesheet" href="../css/research-umbrellas.css?v=20260930" />
 </head>
 
 <body class="minima research-page">
+  <a class="skip-link" href="#main-content">Skip to research content</a>
 
   <!-- Minima-like header (same as index) -->
   <header class="site-header" role="banner">
@@ -38,7 +39,7 @@
 
         <div class="trigger">
           <a class="page-link" href="../index.html#home">Home</a>
-          <a class="page-link" href="./research.html">Research</a>
+          <a class="page-link" href="./research.html" aria-current="page">Research</a>
           <a class="page-link" href="./publication.html">Publications</a>
           <a class="page-link" href="./teachings.html">Resources</a>
           <a class="page-link" href="./blog.html">Blog</a>
@@ -47,63 +48,57 @@
     </div>
   </header>
 
-  <main class="page-content" aria-label="Content">
-    <div class="wrapper">
-      <article class="post">
-        <header class="post-header">
-          <h1 class="post-title">Research</h1>
-        </header>
-
-        <div class="post-content">
-
-          <div class="research-supergrid">
-            <section class="research-group research-group-span-2">
-              <div class="research-group-header">
-                <h2>Persistent Monitoring</h2>
-                <p>Selected works on persistent monitoring are grouped in the first two columns.</p>
-              </div>
-            </section>
-
-            <section class="research-group research-group-span-2">
-              <div class="research-group-header">
-                <h2>Source Localization</h2>
-                <p>Odor sensing and animal-in-the-loop videos are grouped in the last two columns.</p>
-              </div>
-            </section>
-
-            <article id="voronoi" class="research-panel">
-              <h3>Voronoi-based Coverage Control for Multi-Robot Systems</h3>
+<main class="page-content" id="main-content" aria-label="Content"><div class="wrapper"><div class="research-intro" id="research-overview">
+  <p class="research-eyebrow">Networked robotics · Control · Learning</p>
+  <h1 class="post-title">Research</h1>
+  <figure class="research-overview-figure">
+    <a href="../img/research/research-umbrella.webp" target="_blank" rel="noopener" aria-label="Open the research overview image at full size">
+      <img src="../img/research/research-umbrella.webp" width="1448" height="1086" fetchpriority="high" alt="Four connected research umbrellas: long-duration persistent monitoring; resilient control, estimation, and learning; strategic and belief-space pursuit under partial information; and 3D inspection and geometric safety. Networked robotics, machine learning, control, and game theory connect the four areas.">
+    </a>
+    <figcaption>Four connected research directions in autonomous and networked systems.</figcaption>
+  </figure>
+</div>
+<nav class="umbrella-nav" aria-label="Research umbrellas"><ol>
+<li class="theme-blue"><a href="#persistent-monitoring"><span class="umbrella-index">01</span><span>Long-Duration Persistent Monitoring</span><span class="nav-arrow" aria-hidden="true">↗</span></a></li>
+<li class="theme-green"><a href="#resilient-control"><span class="umbrella-index">02</span><span>Resilient Networked Control, Estimation, and Learning</span><span class="nav-arrow" aria-hidden="true">↗</span></a></li>
+<li class="theme-orange"><a href="#belief-space-pursuit"><span class="umbrella-index">03</span><span>Strategic and Belief-Space Pursuit under Partial Information</span><span class="nav-arrow" aria-hidden="true">↗</span></a></li>
+<li class="theme-purple"><a href="#geometric-safety"><span class="umbrella-index">04</span><span>3D Inspection and Geometric Safety</span><span class="nav-arrow" aria-hidden="true">↗</span></a></li>
+</ol></nav>
+<section id="persistent-monitoring" class="umbrella-section theme-blue" aria-labelledby="persistent-monitoring-title">
+<header class="umbrella-heading"><span class="umbrella-index" aria-hidden="true">01</span><h2 id="persistent-monitoring-title">Long-Duration Persistent Monitoring</h2></header>
+<div class="umbrella-synopsis"><p>Long-duration monitoring requires autonomous systems to maintain reliable spatial coverage over extended periods while operating under limited energy, sensing, communication, and computational resources.
+Unlike short-term coverage missions, persistent operation introduces additional challenges such as task redistribution, charging and re-entry, changing environmental priorities, congestion, and the need to preserve monitoring performance despite agents temporarily leaving the mission.</p>
+<p>These problems become increasingly difficult as the number of agents grows and as sensing objectives, safety constraints, and shared resources become coupled.
+A central research question is therefore how a network of autonomous agents can sustain effective monitoring performance over long time horizons while adapting to operational constraints and changes in mission demand.</p>
+<p>Here, we show several of our research directions on long-duration persistent monitoring, including coverage, task allocation, resilient coordination, and multi-agent path planning.</p>
+</div>
+<h3 class="subheading">Core publications</h3><ul class="umbrella-publications">
+<li><a href="https://ieeexplore.ieee.org/document/10379586" target="_blank" rel="noopener noreferrer">A Two-Layer Control Framework for Persistent Monitoring of a Large Area With a Robotic Sensor Network</a></li>
+<li><a href="https://researchportal.tuni.fi/files/125583475/CASE24.pdf" target="_blank" rel="noopener noreferrer">Efficient Multi-Robot Task Allocation with Nonsmooth Objective Functions for Persistent Monitoring in Large Dispersed Areas</a></li>
+<li><a href="https://researchportal.tuni.fi/files/153561643/human-swarm-case25.pdf" target="_blank" rel="noopener noreferrer">Human-Drone Swarm Interaction System for Persistent Monitoring of Large Disperse Area</a></li>
+<li>Persistent Monitoring of Large Dispersed Areas using Drone Swarms: Algorithms and Experimental Validation</li>
+</ul>
+<h3 class="subheading">Application-oriented earlier work</h3><p class="publication-note">Preprint</p><ul class="umbrella-publications">
+<li>A review of Implementation and Challenges of Unmanned Aerial Vehicles for Spraying Applications and Crop Monitoring in Indonesia</li>
+</ul>
+<h3 class="subheading">Research videos</h3><div class="umbrella-videos">
+<article id="voronoi" class="research-panel">
+              <h4>Voronoi-based Coverage Control for Multi-Robot Systems</h4>
               <p>We present a Voronoi-based coverage control algorithm for multi-robot systems to achieve optimal area coverage.</p>
 
               <div class="ratio-16x9 research-video-frame">
-                <iframe
-                  src="https://www.youtube.com/embed/l0SbVZZOPSA?autoplay=1&mute=1&playsinline=1"
-                  title="Voronoi Coverage Control Video"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
-                  loading="lazy"></iframe>
+                <iframe src="https://www.youtube.com/embed/l0SbVZZOPSA?mute=1&amp;playsinline=1" title="Voronoi Coverage Control Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
               </div>
 
-              <div class="resources under-video">
-                <div class="btn-row">
-                  <a class="btn-minima" href="#" target="_blank" rel="noopener">PDF</a>
-                  <a class="btn-minima" href="#" target="_blank" rel="noopener">BibTeX</a>
-                  <a class="btn-minima" href="#" target="_blank" rel="noopener">Code</a>
-                </div>
-              </div>
-            </article>
+              </article>
 
-            <article id="human-swarm" class="research-panel">
-              <h3>Human-Drone Swarm Interaction System for Persistent Monitoring</h3>
+
+<article id="human-swarm" class="research-panel">
+              <h4>Human-Drone Swarm Interaction System for Persistent Monitoring</h4>
               <p>We present a human-drone swarm interaction system for persistent monitoring of large disperse areas using ergodic coverage control and safety-aware coordination.</p>
 
               <div class="ratio-16x9 research-video-frame">
-                <iframe
-                  src="https://www.youtube.com/embed/iXuJmhCI0rQ?autoplay=1&mute=1&playsinline=1"
-                  title="Human-Swarm Video"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
-                  loading="lazy"></iframe>
+                <iframe src="https://www.youtube.com/embed/iXuJmhCI0rQ?mute=1&amp;playsinline=1" title="Human-Swarm Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
               </div>
 
               <div class="resources under-video">
@@ -120,32 +115,72 @@
   organization={IEEE}
 }</pre>
                   </details>
-                  <a class="btn-minima" href="#" target="_blank" rel="noopener">Code</a>
-                </div>
+                  </div>
               </div>
             </article>
 
-            <article id="odor-sensing" class="research-panel">
-              <h3>Design and Experimental Evaluation of Odor Sensing</h3>
+
+</div>
+<a class="back-to-overview" href="#research-overview">Back to overview ↑</a>
+</section>
+<section id="resilient-control" class="umbrella-section theme-green" aria-labelledby="resilient-control-title">
+<header class="umbrella-heading"><span class="umbrella-index" aria-hidden="true">02</span><h2 id="resilient-control-title">Resilient Networked Control, Estimation, and Learning</h2></header>
+<div class="umbrella-synopsis"><p>Modern autonomous systems increasingly operate as interconnected dynamical networks whose performance depends not only on individual controllers, but also on communication, distributed information, estimation, and interactions among agents.
+Such systems must remain stable and safe despite disturbances, modeling uncertainty, actuator limitations, topology changes, cyber-physical attacks, and imperfect information shared across the network.</p>
+<p>At the same time, purely model-based approaches may become difficult to scale to highly nonlinear or uncertain environments, whereas learning-based approaches may lack the stability and safety guarantees required for safety-critical operation.
+An important challenge is therefore to combine robust control, distributed estimation, optimization, and learning while preserving interpretable performance and safety guarantees at the system level.</p>
+<p>Here, we show several of our research directions on resilient networked control, nonlinear control, observer-based estimation, learning-enhanced control, and safety-critical coordination.</p>
+</div>
+<h3 class="subheading">Networked and formation control publications</h3><ul class="umbrella-publications">
+<li>Multi-Agent Formation Control under Switching Network and Input Constraints</li>
+<li>Multi-Agent Formation Control using Internal Model Principle</li>
+<li>Multi-Agent Formation based on Self-loop Laplacian</li>
+<li>Scalable Formation Control of Double Integrator Agents: A Distributed Observer Approach</li>
+<li>Distributed Observer Approach for Scalable Formation Control of Multi-Agent Network</li>
+<li>Multi-Agent Formation with Size Scaling via Self-Position Feedback</li>
+<li>Formation Control of Non-Identical Multi-Agent Systems</li>
+<li>Full-State Feedback Control Design for Shape Formation Using Linear Quadratic Regulator</li>
+<li>An overview of fundamental step using wi-fi communication for flight formation quadrotors</li>
+</ul>
+<h3 class="subheading">Related control, estimation, and learning publications</h3><ul class="umbrella-publications">
+<li>H-infinity Controller Design of Two-Wheeled Mobile Robot Under Disturbance</li>
+<li>Implementation of Convolutional Neural Network (CNN) Algorithm for Autonomous Robot</li>
+<li>Development of Autonomous Robot Using Fuzzy Inference System (FIS) for Indoor Ultraviolet (UV) Disinfection</li>
+<li>Autonomous Mobile Robot Localization using Markov Decision Algorithm</li>
+<li>Mini UAV Orientation Control based on Face Tracking Algorithm</li>
+</ul>
+<a class="back-to-overview" href="#research-overview">Back to overview ↑</a>
+</section>
+<section id="belief-space-pursuit" class="umbrella-section theme-orange" aria-labelledby="belief-space-pursuit-title">
+<header class="umbrella-heading"><span class="umbrella-index" aria-hidden="true">03</span><h2 id="belief-space-pursuit-title">Strategic and Belief-Space Pursuit under Partial Information</h2></header>
+<div class="umbrella-synopsis"><p>Autonomous pursuit and interaction problems become fundamentally more difficult when agents have asymmetric or incomplete information about one another.
+A pursuer may need to infer the position, motion, intention, or future behavior of another agent while simultaneously deciding how to move, acquire information, maintain safety, and accomplish a connection or capture objective.</p>
+<p>The problem becomes even richer when multiple agents interact strategically, since the motion of one agent changes the decisions and information available to the others.
+These scenarios arise in surveillance, search, interception, connectivity maintenance, and autonomous coordination in uncertain environments.
+The central challenge is to understand how decision making, information acquisition, strategic interaction, and safety can be coupled within a common dynamical framework.</p>
+<p>Here, we show several of our research directions on pursuit–evasion, belief-space pursuit, information-aware decision making, and adaptive pursuit under partial information.</p>
+</div>
+<h3 class="subheading">Source localization and bio-inspired search publications</h3><ul class="umbrella-publications">
+<li>Palm-Sized Quadrotor Source Localization Using Modified Bio-Inspired Algorithm in Obstacle Region</li>
+<li>Gas Source Localization using Bio-inspired Algorithm for Mini Flying Sniffer Robot: Development and Experimental Investigation</li>
+<li>A Micro Quadrotor Gas Source Localization Benchmark in a Low-Computational Controller</li>
+<li>Odor Source Localization in Low Computational Controller Micro Quadrotor</li>
+<li><a href="https://www.mdpi.com/1424-8220/18/11/3720" target="_blank" rel="noopener noreferrer">Design and Experimental Evaluation of an Odor Sensing Method for a Pocket-Sized Quadcopter</a></li>
+<li>Investigation of Male Searching for Female Silkworm using an Artificial Pheromone in Free-Space Environment</li>
+<li><a href="https://www.tandfonline.com/doi/full/10.1080/01691864.2018.1511473" target="_blank" rel="noopener noreferrer">Animal-in-the-loop system to investigate adaptive behavior</a></li>
+</ul>
+<h3 class="subheading">Extended and non-refereed works</h3><ul class="umbrella-publications"><li>Chemical Plume Tracing using Palm-Sized Quadrotor in 2D Obstacle Environment</li><li>Development of Autonomous Palm-Sized Drone System for Chemical Leakage Source Search</li></ul><p class="publication-note"><a href="./nonrefereed.html#extended-abstracts">Extended publication details ↗</a></p><h3 class="subheading">Research videos</h3><div class="umbrella-videos">
+<article id="odor-sensing" class="research-panel">
+              <h4>Design and Experimental Evaluation of Odor Sensing</h4>
               <p>We present the result of drone tracking of odor trails validated in experiments.</p>
 
               <div class="research-video-stack">
                 <div class="ratio-16x9 research-video-frame">
-                  <iframe
-                    src="https://www.youtube.com/embed/0KLzqTbYjlQ?autoplay=1&mute=1&playsinline=1"
-                    title="Odor Sensing Video"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen
-                    loading="lazy"></iframe>
+                  <iframe src="https://www.youtube.com/embed/0KLzqTbYjlQ?mute=1&amp;playsinline=1" title="Odor Sensing Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
                 </div>
 
                 <div class="ratio-16x9 research-video-frame">
-                  <iframe
-                    src="https://www.youtube.com/embed/KHk4t_biDC0?autoplay=1&mute=1&playsinline=1"
-                    title="Odor Sensing Video 2"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen
-                    loading="lazy"></iframe>
+                  <iframe src="https://www.youtube.com/embed/KHk4t_biDC0?mute=1&amp;playsinline=1" title="Odor Sensing Video 2" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
                 </div>
               </div>
 
@@ -169,17 +204,13 @@
               </div>
             </article>
 
-            <article id="animal-loop" class="research-panel">
-              <h3>Animal-in-the-Loop</h3>
+
+<article id="animal-loop" class="research-panel">
+              <h4>Animal-in-the-Loop</h4>
               <p>We exhibit a drone controlled by silkworm moth in an animal-in-the-loop experiment.</p>
 
               <div class="ratio-16x9 research-video-frame">
-                <iframe
-                  src="https://www.youtube.com/embed/-xw8PyRQpAM?autoplay=1&mute=1&playsinline=1"
-                  title="Animal-in-the-Loop Video"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
-                  loading="lazy"></iframe>
+                <iframe src="https://www.youtube.com/embed/-xw8PyRQpAM?mute=1&amp;playsinline=1" title="Animal-in-the-Loop Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
               </div>
 
               <div class="resources under-video">
@@ -195,126 +226,29 @@
   number={17},
   pages={945--953},
   year={2018},
-  publisher={Taylor \& Francis}
+  publisher={Taylor \&amp; Francis}
 }</pre>
                   </details>
                 </div>
               </div>
             </article>
 
-            <section class="research-group research-group-span-2">
-              <div class="research-group-header">
-                <h2>Optimal Transport</h2>
-                <p>Two optimal transport simulations are shown in the first two columns.</p>
-              </div>
-            </section>
 
-            <section class="research-group research-group-span-2">
-              <div class="research-group-header">
-                <h2>MAPF</h2>
-                <p>A warehouse multi-agent path finding simulation is shown in the last two columns.</p>
-              </div>
-            </section>
-
-            <article id="optimal-transport-cbf" class="research-panel">
-              <h3>Optimal Transport: DDOC + CBF</h3>
-              <p>Simulation result for optimal transport with DDOC and control barrier function.</p>
-
-              <div class="research-gif-frame">
-                <video autoplay muted loop playsinline preload="metadata" aria-label="Optimal transport simulation with DDOC and CBF">
-                  <source src="../img/research/optimal-transport-ddoc-cbf.mp4" type="video/mp4" />
-                </video>
-              </div>
-
-              <div class="resources under-video">
-                <div class="btn-row">
-                  <a class="btn-minima" href="#" target="_blank" rel="noopener">PDF</a>
-                  <a class="btn-minima" href="#" target="_blank" rel="noopener">BibTeX</a>
-                  <a class="btn-minima" href="#" target="_blank" rel="noopener">Code</a>
-                </div>
-              </div>
-            </article>
-
-            <article id="optimal-transport-sensing" class="research-panel">
-              <h3>Optimal Transport: DDOC + Sensing</h3>
-              <p>Simulation result for optimal transport with DDOC and sensing.</p>
-
-              <div class="research-gif-frame">
-                <video autoplay muted loop playsinline preload="metadata" aria-label="Optimal transport simulation with DDOC and sensing">
-                  <source src="../img/research/optimal-transport-ddoc-sensing.mp4" type="video/mp4" />
-                </video>
-              </div>
-
-              <div class="resources under-video">
-                <div class="btn-row">
-                  <a class="btn-minima" href="#" target="_blank" rel="noopener">PDF</a>
-                  <a class="btn-minima" href="#" target="_blank" rel="noopener">BibTeX</a>
-                  <a class="btn-minima" href="#" target="_blank" rel="noopener">Code</a>
-                </div>
-              </div>
-            </article>
-
-            <article id="mapf-demo" class="research-panel research-panel-span-2">
-              <h3>Warehouse MAPF Simulation</h3>
-              <p>A sample simulation for multi-agent path finding in a warehouse environment.</p>
-
-              <div class="research-gif-frame research-gif-frame-wide">
-                <video autoplay muted loop playsinline preload="metadata" aria-label="Warehouse MAPF simulation">
-                  <source src="../img/research/mapf-warehouse.mp4" type="video/mp4" />
-                </video>
-              </div>
-
-              <div class="resources under-video">
-                <div class="btn-row">
-                  <a class="btn-minima" href="#" target="_blank" rel="noopener">PDF</a>
-                  <a class="btn-minima" href="#" target="_blank" rel="noopener">BibTeX</a>
-                  <a class="btn-minima" href="#" target="_blank" rel="noopener">Code</a>
-                </div>
-              </div>
-            </article>
-
-            <section class="research-group research-group-full">
-              <div class="research-group-header">
-                <h2>Networked Systems</h2>
-                <p>Selected networked systems simulations are collected in one full-width panel.</p>
-              </div>
-            </section>
-
-            <article id="networked-systems" class="research-panel research-panel-span-4">
-              <h3>Networked Systems Simulations</h3>
-              <p>Representative simulations on coordinated formations and distributed networked control.</p>
-
-              <div class="research-gif-gallery">
-                <figure class="research-gif-card">
-                  <div class="research-gif-frame research-gif-frame-gallery">
-                    <img src="../img/research/formation_rotate.gif" alt="Formation rotation simulation" loading="lazy" />
-                  </div>
-                  <figcaption>Formation Rotation</figcaption>
-                </figure>
-
-                <figure class="research-gif-card">
-                  <div class="research-gif-frame research-gif-frame-gallery">
-                    <video autoplay muted loop playsinline preload="metadata" aria-label="Formation tunnel simulation">
-                      <source src="../img/research/formation_tunnel_solid.mp4" type="video/mp4" />
-                    </video>
-                  </div>
-                  <figcaption>Formation Tunnel</figcaption>
-                </figure>
-
-                <figure class="research-gif-card">
-                  <div class="research-gif-frame research-gif-frame-gallery">
-                    <img src="../img/research/distributed_lpt_la_f_demo.gif" alt="Distributed networked systems simulation" loading="lazy" />
-                  </div>
-                  <figcaption>Distributed LPT-LA-F Demo</figcaption>
-                </figure>
-              </div>
-            </article>
-          </div>
-
-        </div>
-      </article>
-    </div>
-  </main>
+</div>
+<a class="back-to-overview" href="#research-overview">Back to overview ↑</a>
+</section>
+<section id="geometric-safety" class="umbrella-section theme-purple" aria-labelledby="geometric-safety-title">
+<header class="umbrella-heading"><span class="umbrella-index" aria-hidden="true">04</span><h2 id="geometric-safety-title">3D Inspection and Geometric Safety</h2></header>
+<div class="umbrella-synopsis"><p>Autonomous inspection in three-dimensional environments requires vehicles to move close to complex structures while maintaining precise motion, collision avoidance, and physical feasibility.
+The difficulty increases substantially when the environment itself is dynamic, such as rotating wind-turbine blades, or when obstacle motion is only partially observed and must be predicted from limited sensing.</p>
+<p>Unlike planar navigation, aerial inspection must account for full three-dimensional vehicle dynamics, orientation, actuation constraints, moving geometry, uncertainty, and the need to preserve useful inspection trajectories near the structure.
+These requirements create a challenging interaction between geometric motion planning, prediction, uncertainty, and safety-critical control.
+A key research question is therefore how autonomous aerial systems can perform close-proximity inspection safely and efficiently when both the vehicle dynamics and surrounding geometry are inherently three-dimensional and time varying.</p>
+<p>Here, we show several of our research directions on geometric safety, dynamic-obstacle prediction, uncertainty-aware inspection, and autonomous operation around complex 3D infrastructure.</p>
+</div>
+<p class="research-status">Ongoing research. Publications and demonstrations will be added as they become available.</p><a class="back-to-overview" href="#research-overview">Back to overview ↑</a>
+</section>
+<p class="publication-index-link"><a href="./publication.html">View the full publication list →</a></p></div></main>
 
   <!-- Same footer style as index (with your links) -->
   <footer class="site-footer h-card">
