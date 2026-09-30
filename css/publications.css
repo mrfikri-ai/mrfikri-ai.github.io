@@ -1,0 +1,45 @@
+/* Publication styles are scoped to avoid changing other pages. */
+body.minima.publications-page { font-weight: 400; }
+body.minima.publications-page .wrapper { max-width: 1100px; }
+body.publications-page .publication-header { margin: 24px 0 28px; }
+body.publications-page .publication-kicker { color: var(--muted); font-size: .85rem; margin: 0; }
+body.publications-page h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 500; line-height: 1.2; margin: 8px 0 18px; }
+body.publications-page .publication-updated { font-size: .85rem; color: var(--muted); }
+body.publications-page .theme-blue { --accent: #0959ac; --tint: #f0f6fd; }
+body.publications-page .theme-green { --accent: #167039; --tint: #f1f8f3; }
+body.publications-page .theme-orange { --accent: #a2440b; --tint: #fff6ee; }
+body.publications-page .theme-purple { --accent: #6938ad; --tint: #f7f3fc; }
+body.publications-page .theme-neutral { --accent: #445269; --tint: #f5f7fa; }
+body.publications-page .publication-nav ol { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; list-style: none; padding: 0; margin: 0 0 48px; }
+body.publications-page .publication-nav li { border: 1px solid var(--line); border-top: 3px solid var(--accent); background: var(--tint); border-radius: 10px; }
+body.publications-page .publication-nav a { display: flex; gap: 14px; padding: 18px; color: var(--text); line-height: 1.5; box-sizing: border-box; height: 100%; }
+body.publications-page .publication-nav a:hover { background: #ffffff70; text-decoration: none; }
+body.publications-page .category-number { font-weight: 600; color: var(--accent); flex: 0 0 24px; }
+body.publications-page .publication-section { border-top: 1px solid var(--line); padding-top: 30px; margin-bottom: 48px; scroll-margin-top: 24px; }
+body.publications-page .publication-section h2 { font-weight: 500; font-size: clamp(1.45rem, 3vw, 1.9rem); color: var(--accent); line-height: 1.4; margin: 0 0 10px; }
+body.publications-page .research-context { font-size: .85rem; }
+body.publications-page .publication-section h3 { font-size: 1rem; font-weight: 500; margin: 28px 0 0; }
+body.publications-page .publication-list { list-style: none; padding: 0; margin: 0; }
+body.publications-page .publication-entry { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 18px; padding: 22px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 24px; }
+body.publications-page .publication-year { color: var(--accent); font-size: .9rem; font-weight: 500; padding-top: 2px; }
+body.publications-page .publication-details h4 { font-size: 1rem; font-weight: 500; line-height: 1.55; margin: 0 0 6px; }
+body.publications-page .publication-authors, body.publications-page .publication-venue { font-size: .88rem; margin: 4px 0; color: var(--muted); }
+body.publications-page .publication-venue { font-style: italic; }
+body.publications-page .publication-links { display: flex; flex-wrap: wrap; gap: 16px; font-size: .83rem; margin-top: 8px; }
+body.publications-page .publication-note { font-size: .85rem; color: var(--muted); }
+body.publications-page .publication-empty { border-left: 3px solid var(--accent); background: var(--tint); padding: 18px; margin-top: 24px; }
+body.publications-page .related-preprint { margin-top: 24px; font-size: .9rem; }
+body.publications-page .publication-back { display: inline-block; margin-top: 24px; font-size: .85rem; }
+body.publications-page .publication-archive { border-top: 1px solid var(--line); padding-top: 20px; }
+body.publications-page .legacy-anchor { display: block; scroll-margin-top: 24px; }
+body.publications-page a:focus-visible { outline: 3px solid #0959ac; outline-offset: 4px; }
+body.publications-page .skip-link { position: absolute; left: 16px; top: -100px; padding: 12px; background: #fff; z-index: 100; }
+body.publications-page .skip-link:focus { top: 10px; }
+body.publications-page .nav-trigger { display: block; position: absolute; width: 1px; height: 1px; opacity: 0; }
+body.publications-page .nav-trigger:focus-visible + label .menu-icon { outline: 3px solid #0959ac; outline-offset: 3px; }
+@media (max-width: 600px) {
+  body.publications-page .publication-nav ol { grid-template-columns: 1fr; }
+  body.publications-page .publication-entry { grid-template-columns: 1fr; gap: 5px; }
+  body.publications-page .publication-nav a { padding: 14px; }
+  body.minima.publications-page .site-title { font-size: 16px; white-space: normal; }
+}
